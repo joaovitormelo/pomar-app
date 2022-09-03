@@ -2,11 +2,13 @@ class UserNotFoundError implements Exception {}
 
 class UnauthorizedError implements Exception {}
 
-class ConnectionError implements Exception {}
-
 class ValidationError implements Exception {}
 
 class ServerError implements Exception {}
+
+class ConnectionError implements Exception {}
+
+class EmptyResponseError implements Exception {}
 
 class NetworkError implements Exception {}
 

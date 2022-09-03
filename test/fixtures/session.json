@@ -1,0 +1,16 @@
+{
+  "idSession": 1,
+  "user": {
+    "idUser": 1,
+    "person": {
+      "idPerson": 1,
+      "name": "name",
+      "email": "email",
+      "phone": "phone"
+    },
+    "password": "password",
+    "typeUser": 0
+  },
+  "jwtToken": "jwtToken",
+  "loginTime": "loginTime"
+}
