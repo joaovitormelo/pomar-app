@@ -14,8 +14,6 @@ class DidLogin extends AuthEvent {
   DidLogin({required this.session});
 }
 
-class LogoutEvent extends AuthEvent {
-  final int idSession;
+class DidLogout extends AuthEvent {}
 
-  LogoutEvent({required this.idSession});
-}
+class StartedLoading extends AuthEvent {}

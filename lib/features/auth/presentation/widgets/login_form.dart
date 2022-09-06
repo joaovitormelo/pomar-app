@@ -62,7 +62,7 @@ class FormLogin extends StatelessWidget with InputValidationMixin {
             listenWhen: (context, state) => state is Error,
             listener: (context, state) {
               ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text((state as Error).message)));
+                  SnackBar(content: Text((state as LoginError).message)));
             },
           ),
         ],

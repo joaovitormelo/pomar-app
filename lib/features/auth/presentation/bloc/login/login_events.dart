@@ -5,8 +5,8 @@ abstract class LoginEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class DoLoginEvent extends LoginEvent {
+class LoginButtonPressed extends LoginEvent {
   final String email;
   final String password;
-  DoLoginEvent({required this.email, required this.password});
+  LoginButtonPressed({required this.email, required this.password});
 }

@@ -11,6 +11,8 @@ import 'package:http/http.dart' as http;
 
 abstract class ServerSourceContract {
   Future<SessionModel>? doLogin(LoginParams params);
+
+  Future<void> logout(int idSession);
 }
 
 class ServerSource implements ServerSourceContract {
@@ -37,6 +39,29 @@ class ServerSource implements ServerSourceContract {
       throw ConnectionError();
     } else {
       throw ServerError();
+    }
+  }
+
+  @override
+  Future<void> logout(int idSession) async {
+    var url = Uri.http(Constants.serverUrl, "logout");
+    var body = {"id_session": idSession.toString()};
+    var response;
+    try {
+      response = await http.post(url, body: body);
+    } catch (e) {
+      throw ConnectionError();
+    }
+    var responseData =
+        response.body != "" ? convert.jsonDecode(response.body) : {};
+    if (response.statusCode != 200) {
+      if (response.statusCode == 400) {
+        throw ValidationError();
+      } else if (response.statusCode == 503 && responseData["code"] == "001") {
+        throw ConnectionError();
+      } else {
+        throw ServerError();
+      }
     }
   }
 }

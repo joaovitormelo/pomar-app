@@ -5,12 +5,12 @@ abstract class LoginState extends Equatable {
   List<Object?> get props => [];
 }
 
-class Default extends LoginState {}
+class LoginDefault extends LoginState {}
 
 class Logging extends LoginState {}
 
-class Error extends LoginState {
+class LoginError extends LoginState {
   final String message;
 
-  Error({required this.message});
+  LoginError({required this.message});
 }

@@ -33,8 +33,15 @@ class LoginRepository implements LoginRepositoryContract {
   }
 
   @override
-  Future<void>? logout(int idSession) {
-    // TODO: implement logout
-    throw UnimplementedError();
+  Future<void>? logout(int idSession) async {
+    if (!(await networkInfo.checkConnection() as bool)) {
+      throw NetworkError();
+    }
+    await serverSource.logout(idSession);
+  }
+
+  @override
+  Future<void>? removeSavedSession(int idSession) async {
+    await storageSource.removeSavedSession(idSession);
   }
 }

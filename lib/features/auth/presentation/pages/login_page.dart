@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 import 'package:pomar_app/features/auth/presentation/widgets/login_form.dart';
-import 'package:pomar_app/core/initializer.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -25,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     if (isValid) {
       final fields = _formKey.currentState?.fields;
       BlocProvider.of<LoginBloc>(context).add(
-        DoLoginEvent(
+        LoginButtonPressed(
           email: fields?['email']?.value,
           password: fields?['password']?.value,
         ),

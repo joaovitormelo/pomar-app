@@ -6,4 +6,5 @@ abstract class LoginRepositoryContract {
   Future<Session>? doLogin(LoginParams params);
   Future<void>? saveSession(Session? session);
   Future<void>? logout(int idSession);
+  Future<void>? removeSavedSession(int idSession);
 }
