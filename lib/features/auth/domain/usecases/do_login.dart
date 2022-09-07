@@ -1,4 +1,3 @@
-import 'package:pomar_app/core/routes/routes.dart';
 import 'package:pomar_app/features/auth/domain/entities/session.dart';
 import 'package:pomar_app/features/auth/domain/repository/login_repository_contract.dart';
 

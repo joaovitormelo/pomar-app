@@ -7,6 +7,6 @@ class Logout {
 
   call(int idSession) async {
     await loginRepository.logout(idSession);
-    await loginRepository.removeSavedSession(idSession);
+    await loginRepository.removeSavedSession();
   }
 }
