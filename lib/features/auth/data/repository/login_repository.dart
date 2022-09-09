@@ -53,5 +53,7 @@ class LoginRepository implements LoginRepositoryContract {
   }
 
   @override
-  Future<void> validateSession(Session session) async {}
+  Future<void> validateSession(Session session) async {
+    await serverSource.validateSession(SessionModel.fromEntity(session));
+  }
 }

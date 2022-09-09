@@ -6,7 +6,11 @@ mixin InputValidationMixin {
   final passwordRegex =
       RegExp(r'^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$');
 
-  String? validatePassword(String password) {
+  String? validatePassword(password) {
+    if (password == null) {
+      return "Informe uma senha";
+    }
+    password = password as String;
     if (password.isEmpty) {
       return "Informe uma senha";
     }
@@ -28,7 +32,11 @@ mixin InputValidationMixin {
     return null;
   }
 
-  String? validateEmail(String email) {
+  String? validateEmail(email) {
+    if (email == null) {
+      return "Informe um email";
+    }
+    email = email as String;
     if (email.isEmpty) {
       return "Informe um email";
     }

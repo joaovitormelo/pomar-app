@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/initializer.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
-import 'package:pomar_app/features/auth/presentation/home/presentation/pages/home_admin_page.dart';
-import 'package:pomar_app/features/auth/presentation/home/presentation/pages/home_employee_page.dart';
+import 'package:pomar_app/features/home/presentation/pages/home_admin_page.dart';
+import 'package:pomar_app/features/home/presentation/pages/home_employee_page.dart';
 import 'package:pomar_app/features/auth/presentation/pages/login_page.dart';
 
 void main() async {

@@ -67,9 +67,10 @@ class _HomeAdminState extends State<HomeAdmin> {
         ),
       ),
       body: BlocListener<LogoutBloc, LogoutState>(
-        listenWhen: (context, state) => state is LogoutError,
         listener: (context, state) {
-          showSnackBar(context, (state as LogoutError).message);
+          if (state is LogoutError) {
+            showSnackBar(context, (state as LogoutError).message);
+          }
         },
         child: Center(
           child: Column(

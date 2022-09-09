@@ -11,8 +11,8 @@ import 'package:http/http.dart' as http;
 
 abstract class ServerSourceContract {
   Future<SessionModel>? doLogin(LoginParams params);
-
   Future<void> logout(int idSession);
+  Future<void> validateSession(SessionModel session);
 }
 
 class ServerSource implements ServerSourceContract {
@@ -29,16 +29,8 @@ class ServerSource implements ServerSourceContract {
     var responseData = convert.jsonDecode(response.body);
     if (response.statusCode == 200) {
       return SessionModel.fromJSON(responseData["session"]);
-    } else if (response.statusCode == 404 && responseData["code"] == "002") {
-      throw UserNotFoundError();
-    } else if (response.statusCode == 401 && responseData["code"] == "001") {
-      throw UnauthorizedError();
-    } else if (response.statusCode == 400) {
-      throw ValidationError();
-    } else if (response.statusCode == 503 && responseData["code"] == "001") {
-      throw ConnectionError();
     } else {
-      throw ServerError();
+      throw mapServerResponseToError(response.statusCode, responseData);
     }
   }
 
@@ -55,13 +47,25 @@ class ServerSource implements ServerSourceContract {
     var responseData =
         response.body != "" ? convert.jsonDecode(response.body) : {};
     if (response.statusCode != 200) {
-      if (response.statusCode == 400) {
-        throw ValidationError();
-      } else if (response.statusCode == 503 && responseData["code"] == "001") {
-        throw ConnectionError();
-      } else {
-        throw ServerError();
-      }
+      throw mapServerResponseToError(response.statusCode, responseData);
+    }
+  }
+
+  @override
+  Future<void> validateSession(SessionModel session) async {
+    var url = Uri.http(Constants.serverUrl, "validateSession");
+    var body = {"session": convert.jsonEncode(session.toJSON())};
+    var response;
+    try {
+      response = await http.post(url, body: body);
+    } catch (e) {
+      inspect(e);
+      throw ConnectionError();
+    }
+    var responseData =
+        response.body != "" ? convert.jsonDecode(response.body) : {};
+    if (response.statusCode != 200) {
+      throw mapServerResponseToError(response.statusCode, responseData);
     }
   }
 }

@@ -1,10 +1,6 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
-import 'package:pomar_app/core/errors/errors.dart';
 import 'package:pomar_app/features/auth/domain/entities/session.dart';
 import 'package:pomar_app/features/auth/domain/usecases/do_login_with_stored_session.dart';
-import 'package:pomar_app/features/auth/domain/usecases/logout.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -18,7 +14,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void onAppInitialized(AppInitialized event, emit) async {
-    print("DEALING APPInitialized");
     try {
       Session session = await doLoginWithStoredSession() as Session;
       if (session.user.typeUser == 0) {

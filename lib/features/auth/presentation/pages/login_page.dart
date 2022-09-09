@@ -53,7 +53,30 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(
                     height: 50,
                   ),
-                  FormLogin(formKey: _formKey, onSubmit: onSubmit),
+                  FormLogin(formKey: _formKey),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  BlocConsumer<LoginBloc, LoginState>(
+                    builder: (context, state) {
+                      if (state is Logging) {
+                        return const CircularProgressIndicator();
+                      } else {
+                        return ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              fixedSize:
+                                  Size(MediaQuery.of(context).size.width, 30)),
+                          onPressed: onSubmit,
+                          child: const Text("Login"),
+                        );
+                      }
+                    },
+                    listenWhen: (context, state) => state is LoginError,
+                    listener: (context, state) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text((state as LoginError).message)));
+                    },
+                  ),
                 ],
               ),
             ),

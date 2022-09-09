@@ -6,20 +6,27 @@ import 'package:pomar_app/features/auth/data/datasources/storage_source.dart';
 import 'package:pomar_app/features/auth/data/repository/login_repository.dart';
 import 'package:pomar_app/features/auth/domain/usecases/do_login.dart';
 import 'package:pomar_app/features/auth/domain/usecases/do_login_with_stored_session.dart';
+import 'package:pomar_app/features/auth/domain/usecases/do_validate_session.dart';
 import 'package:pomar_app/features/auth/domain/usecases/logout.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 
 class LoginInitializer {
+  final DoValidateSession doValidateSession;
+
+  final LoginRepository loginRepository;
+
+  final ServerSource serverSource;
+  final StorageSource storageSource;
+  final NetworkInfo networkInfo;
+
+  LoginInitializer(
+      {required this.doValidateSession,
+      required this.loginRepository,
+      required this.serverSource,
+      required this.storageSource,
+      required this.networkInfo});
+
   Future<void> init() async {
-    NetworkInfo networkInfo = NetworkInfo();
-    StorageSource storageSource = StorageSource();
-    ServerSource serverSource = ServerSource();
-
-    LoginRepository loginRepository = LoginRepository(
-        serverSource: serverSource,
-        storageSource: storageSource,
-        networkInfo: networkInfo);
-
     DoLogin doLogin = DoLogin(LoginRepository: loginRepository);
     Logout logout = Logout(loginRepository: loginRepository);
     DoLoginWithStoredSession doLoginWithStoredSession =
@@ -29,7 +36,9 @@ class LoginInitializer {
         AuthBloc(doLoginWithStoredSession: doLoginWithStoredSession);
     Globals.loginBloc =
         LoginBloc(doLoginUseCase: doLogin, authBloc: Globals.authBloc);
-    Globals.logoutBloc =
-        LogoutBloc(logoutUsecase: logout, authBloc: Globals.authBloc);
+    Globals.logoutBloc = LogoutBloc(
+        doValidateSession: doValidateSession,
+        logoutUsecase: logout,
+        authBloc: Globals.authBloc);
   }
 }

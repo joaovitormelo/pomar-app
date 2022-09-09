@@ -6,10 +6,8 @@ import 'package:pomar_app/features/auth/presentation/helpers/input_validation_mi
 
 class FormLogin extends StatelessWidget with InputValidationMixin {
   final GlobalKey<FormBuilderState> formKey;
-  final dynamic onSubmit;
 
-  FormLogin({Key? key, required this.formKey, required this.onSubmit})
-      : super(key: key);
+  FormLogin({Key? key, required this.formKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,29 +39,7 @@ class FormLogin extends StatelessWidget with InputValidationMixin {
               border: OutlineInputBorder(),
               labelText: "Senha",
             ),
-            validator: (password) => validatePassword(password as String),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          BlocConsumer<LoginBloc, LoginState>(
-            builder: (context, state) {
-              if (state is Logging) {
-                return const CircularProgressIndicator();
-              } else {
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: Size(MediaQuery.of(context).size.width, 30)),
-                  onPressed: onSubmit,
-                  child: const Text("Login"),
-                );
-              }
-            },
-            listenWhen: (context, state) => state is Error,
-            listener: (context, state) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text((state as LoginError).message)));
-            },
+            validator: (password) => validatePassword(password),
           ),
         ],
       ),
