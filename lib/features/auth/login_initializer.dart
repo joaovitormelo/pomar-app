@@ -1,44 +1,48 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/features/auth/data/datasources/network_source.dart';
 import 'package:pomar_app/features/auth/data/datasources/server_source.dart';
 import 'package:pomar_app/features/auth/data/datasources/storage_source.dart';
 import 'package:pomar_app/features/auth/data/repository/login_repository.dart';
+import 'package:pomar_app/features/auth/domain/repository/login_repository_contract.dart';
 import 'package:pomar_app/features/auth/domain/usecases/do_login.dart';
 import 'package:pomar_app/features/auth/domain/usecases/do_login_with_stored_session.dart';
-import 'package:pomar_app/features/auth/domain/usecases/do_validate_session.dart';
 import 'package:pomar_app/features/auth/domain/usecases/logout.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 
 class LoginInitializer {
-  final DoValidateSession doValidateSession;
+  final GetIt sl;
+  final Dio dio;
 
-  final LoginRepository loginRepository;
-
-  final ServerSource serverSource;
-  final StorageSource storageSource;
-  final NetworkInfo networkInfo;
-
-  LoginInitializer(
-      {required this.doValidateSession,
-      required this.loginRepository,
-      required this.serverSource,
-      required this.storageSource,
-      required this.networkInfo});
+  LoginInitializer({required this.sl, required this.dio});
 
   Future<void> init() async {
-    DoLogin doLogin = DoLogin(LoginRepository: loginRepository);
-    Logout logout = Logout(loginRepository: loginRepository);
-    DoLoginWithStoredSession doLoginWithStoredSession =
-        DoLoginWithStoredSession(loginRepository: loginRepository);
+    sl.registerLazySingleton(() => AuthBloc(doLoginWithStoredSession: sl()));
+    sl.registerLazySingleton(
+      () => LoginBloc(doLoginUseCase: sl(), authBloc: sl()),
+    );
+    sl.registerLazySingleton(
+      () => LogoutBloc(logoutUsecase: sl(), authBloc: sl()),
+    );
 
-    Globals.authBloc =
-        AuthBloc(doLoginWithStoredSession: doLoginWithStoredSession);
-    Globals.loginBloc =
-        LoginBloc(doLoginUseCase: doLogin, authBloc: Globals.authBloc);
-    Globals.logoutBloc = LogoutBloc(
-        doValidateSession: doValidateSession,
-        logoutUsecase: logout,
-        authBloc: Globals.authBloc);
+    sl.registerLazySingleton(() => DoLogin(LoginRepository: sl()));
+    sl.registerLazySingleton(() => Logout(loginRepository: sl()));
+    sl.registerLazySingleton(
+      () => DoLoginWithStoredSession(loginRepository: sl()),
+    );
+
+    sl.registerLazySingleton<LoginRepositoryContract>(
+      () => LoginRepository(
+        serverSource: sl(),
+        storageSource: sl(),
+        networkInfo: sl(),
+      ),
+    );
+
+    sl.registerLazySingleton<ServerSourceContract>(
+        () => ServerSource(dio: sl()));
+    sl.registerLazySingleton<StorageSourceContract>(() => StorageSource());
+    sl.registerLazySingleton<NetworkInfoContract>(() => NetworkInfo());
   }
 }

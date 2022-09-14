@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pomar_app/core/errors/errors.dart';
-import 'package:pomar_app/core/routes/routes.dart';
+import 'package:pomar_app/core/routes/fluro_routes.dart';
 import 'package:pomar_app/features/auth/domain/entities/person.dart';
 import 'package:pomar_app/features/auth/domain/entities/session.dart';
 import 'package:mockito/mockito.dart';

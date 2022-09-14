@@ -1,7 +1,5 @@
-import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
+import 'package:get_it/get_it.dart';
 
 class Globals {
-  static late AuthBloc authBloc;
-  static late LoginBloc loginBloc;
-  static late LogoutBloc logoutBloc;
+  static late GetIt sl;
 }

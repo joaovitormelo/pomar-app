@@ -8,5 +8,4 @@ abstract class LoginRepositoryContract {
   Future<void>? logout(int idSession);
   Future<void>? removeSavedSession();
   Future<Session> getSavedSession();
-  Future<void> validateSession(Session session);
 }

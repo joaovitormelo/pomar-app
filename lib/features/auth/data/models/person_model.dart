@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:pomar_app/features/auth/domain/entities/person.dart';
 
@@ -18,7 +20,7 @@ class PersonModel extends Person with EquatableMixin {
 
   factory PersonModel.fromJSON(Map<String, dynamic> personJSON) {
     return PersonModel(
-        idPerson: personJSON["id_person"],
+        idPerson: personJSON["idPerson"],
         name: personJSON["name"],
         email: personJSON["email"],
         phone: personJSON["phone"]);
@@ -26,7 +28,7 @@ class PersonModel extends Person with EquatableMixin {
 
   Map<String, dynamic> toJSON() {
     return {
-      "id_person": idPerson,
+      "idPerson": idPerson,
       "name": name,
       "email": email,
       "phone": phone,

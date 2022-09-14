@@ -16,6 +16,8 @@ class StorageError implements Exception {}
 
 class SessionError implements Exception {}
 
+class NoDataError implements Exception {}
+
 Exception mapServerResponseToError(statusCode, responseData) {
   if (statusCode == 400) {
     throw ValidationError();
@@ -25,6 +27,8 @@ Exception mapServerResponseToError(statusCode, responseData) {
     throw SessionError();
   } else if (statusCode == 404 && responseData["code"] == "002") {
     throw UserNotFoundError();
+  } else if (statusCode == 404 && responseData["code"] == "003") {
+    throw NoDataError();
   } else if (statusCode == 503 && responseData["code"] == "001") {
     throw ConnectionError();
   } else {

@@ -23,7 +23,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       authBloc.add(DidLogin(session: session as Session));
       emit(LoginDefault());
     } catch (e) {
-      emit(mapErrorToMsg(e));
+      emit(LoginError(message: mapErrorToMsg(e)));
     }
   }
 }

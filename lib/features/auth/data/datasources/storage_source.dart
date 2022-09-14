@@ -34,7 +34,6 @@ class StorageSource implements StorageSourceContract {
     try {
       SessionModel session = SessionModel.fromJSON(
           json.decode(sharedPreferences.getString(CACHED_SESSION) as String));
-      inspect(session);
       return session;
     } catch (e) {
       throw StorageError();

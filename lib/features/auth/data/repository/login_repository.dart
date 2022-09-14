@@ -3,9 +3,7 @@ import 'package:pomar_app/features/auth/data/datasources/network_source.dart';
 import 'package:pomar_app/features/auth/data/datasources/server_source.dart';
 import 'package:pomar_app/features/auth/data/datasources/storage_source.dart';
 import 'package:pomar_app/features/auth/data/models/session_model.dart';
-import 'package:pomar_app/features/auth/domain/entities/person.dart';
 import 'package:pomar_app/features/auth/domain/entities/session.dart';
-import 'package:pomar_app/features/auth/domain/entities/user.dart';
 import 'package:pomar_app/features/auth/domain/repository/login_repository_contract.dart';
 import 'package:pomar_app/features/auth/domain/usecases/do_login.dart';
 
@@ -50,10 +48,5 @@ class LoginRepository implements LoginRepositoryContract {
   @override
   Future<Session> getSavedSession() async {
     return await storageSource.getSavedSession();
-  }
-
-  @override
-  Future<void> validateSession(Session session) async {
-    await serverSource.validateSession(SessionModel.fromEntity(session));
   }
 }
