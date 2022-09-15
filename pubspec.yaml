@@ -49,6 +49,8 @@ dependencies:
   dio: ^4.0.6
   dropdown_search: ^5.0.2
   flutter_form_bloc: ^0.30.1
+  flutter_masked_text: ^0.8.0
+  easy_mask: ^2.0.1
 
 dev_dependencies:
   flutter_test:

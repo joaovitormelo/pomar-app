@@ -65,15 +65,15 @@ class _LoginPageState extends State<LoginPage> {
                       builder: (context, state) {
                         if (state is Logging) {
                           return const CircularProgressIndicator();
-                        } else {
-                          return ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                fixedSize: Size(
-                                    MediaQuery.of(context).size.width, 30)),
-                            onPressed: onSubmit,
-                            child: const Text(textLoginButton),
-                          );
                         }
+                        return ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            fixedSize:
+                                Size(MediaQuery.of(context).size.width, 30),
+                          ),
+                          onPressed: onSubmit,
+                          child: const Text(textLoginButton),
+                        );
                       },
                       listenWhen: (context, state) => state is LoginError,
                       listener: (context, state) {

@@ -16,12 +16,14 @@ class EmployeeInitializer {
   Future<void> init() async {
     sl.registerFactory(
         () => EmployeesBloc(authBloc: sl(), doReadEmployees: sl()));
+    sl.registerFactory(
+        () => CreateEmployeeBloc(authBloc: sl(), doCreateEmployee: sl()));
 
     sl.registerLazySingleton(() => DoReadEmployees(employeesRepository: sl()));
     sl.registerLazySingleton(() => DoCreateEmployee(employeeRepository: sl()));
 
     sl.registerLazySingleton<EmployeeRepositoryContract>(
-        () => EmployeeRepository(employeeServerSourceContract: sl()));
+        () => EmployeeRepository(employeeServerSource: sl()));
 
     sl.registerLazySingleton<EmployeeServerSourceContract>(
         () => EmployeeServerSource(dio: sl()));

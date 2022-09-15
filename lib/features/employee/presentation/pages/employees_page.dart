@@ -34,7 +34,6 @@ class _EmployeesBodyState extends State<EmployeesBody> {
   }
 
   onAddEmployeeButtonPressed() {
-    print('Here');
     Navigator.pushReplacementNamed(context, FluroRoutes.addEmployeeRoute);
   }
 
@@ -56,7 +55,6 @@ class _EmployeesBodyState extends State<EmployeesBody> {
             Utils.showSnackBar(context, (state as EmployeesError).msg);
           },
           builder: (context, state) {
-            print(state);
             if (state is EmployeesHasData) {
               return ListView.builder(
                 itemCount: state.employees.length,

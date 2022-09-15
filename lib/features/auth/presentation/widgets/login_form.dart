@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
-import 'package:pomar_app/features/auth/presentation/helpers/input_validation_mixin.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
 
 class FormLogin extends StatelessWidget with InputValidationMixin {
   final GlobalKey<FormBuilderState> formKey;
@@ -34,10 +33,12 @@ class FormLogin extends StatelessWidget with InputValidationMixin {
             obscureText: true,
             enableSuggestions: false,
             autocorrect: false,
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.vpn_key),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.vpn_key),
+              border: const OutlineInputBorder(),
               labelText: "Senha",
+              suffixIcon: IconButton(
+                  icon: const Icon(FontAwesomeIcons.eye), onPressed: () {}),
             ),
             validator: (password) => validatePassword(password),
           ),

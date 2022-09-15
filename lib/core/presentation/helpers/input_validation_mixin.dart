@@ -5,8 +5,10 @@ mixin InputValidationMixin {
   //Mínimo 8 caracteres, uma letra maiúscula e um número
   final passwordRegex =
       RegExp(r'^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$');
+  final invalidCharacterRegex = RegExp(r'[^a-zA-Z\u00C0-\u00FF ]+');
+  final notNumberRegex = RegExp(r'[^0-9]');
 
-  String? validatePassword(password) {
+  String? validatePassword(password, [extraValidation]) {
     if (password == null) {
       return "Informe uma senha";
     }
@@ -29,6 +31,7 @@ mixin InputValidationMixin {
     if (!passwordRegex.hasMatch(password)) {
       return "Deve conter uma letra minúscula";
     }
+    if (extraValidation != null) return extraValidation(password);
     return null;
   }
 
@@ -45,6 +48,43 @@ mixin InputValidationMixin {
     }
     if (!emailRegex.hasMatch(email)) {
       return "Email inválido";
+    }
+    return null;
+  }
+
+  String? validateName(name) {
+    if (name == null) {
+      return "Informe um nome";
+    }
+    name = name as String;
+    if (name.isEmpty) {
+      return "Informe um nome";
+    } else if (name.length > 100) {
+      return "Nome excedeu o limite de caracteres";
+    } else if (invalidCharacterRegex.hasMatch(name)) {
+      return "Insira apenas caracteres válidos!";
+    } else {
+      return null;
+    }
+  }
+
+  String? validatePhone(phone) {
+    if (phone == null) {
+      return "Informe um telefone";
+    }
+    phone = phone as String;
+    phone = phone.replaceFirst("(", "");
+    phone = phone.replaceFirst(")", "");
+    phone = phone.replaceAll(" ", "");
+    phone = phone.replaceFirst("-", "");
+    if (phone.isEmpty) {
+      return "Informe um telefone";
+    }
+    if (phone.length < 10) {
+      return "Complete o número";
+    }
+    if (notNumberRegex.hasMatch(phone)) {
+      return "Insira apenas números!";
     }
     return null;
   }
