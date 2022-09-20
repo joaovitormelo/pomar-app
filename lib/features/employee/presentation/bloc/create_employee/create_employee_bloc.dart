@@ -4,7 +4,7 @@ import 'package:pomar_app/features/auth/domain/entities/session.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:pomar_app/features/employee/domain/usecases/do_create_employee.dart';
-import 'package:pomar_app/features/employee/presentation/bloc/bloc.dart';
+import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
 
 class CreateEmployeeBloc
     extends Bloc<CreateEmployeeEvent, CreateEmployeeState> {

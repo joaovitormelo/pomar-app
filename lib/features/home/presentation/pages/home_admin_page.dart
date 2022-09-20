@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/presentation/templates/authorized_template.dart';
-import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 
 const String textManageEmployeesButton = "Gerencie os funcionários";
 
@@ -20,8 +18,6 @@ class _HomeAdminState extends State<HomeAdmin> {
 
   @override
   Widget build(BuildContext context) {
-    AuthorizedAdmin authState =
-        BlocProvider.of<AuthBloc>(context).state as AuthorizedAdmin;
     return AuthorizedTemplate(
       body: Center(
         child: Column(

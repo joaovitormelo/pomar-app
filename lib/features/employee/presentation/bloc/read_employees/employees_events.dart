@@ -6,3 +6,13 @@ class EmployeesEvent extends Equatable {
 }
 
 class LoadEmployees extends EmployeesEvent {}
+
+class DeleteEmployeeBlocEmmitedLoading extends EmployeesEvent {}
+
+class DeleteEmployeeBlocEmmitedSuccess extends EmployeesEvent {}
+
+class DeleteEmployeeBlocEmmitedError extends EmployeesEvent {
+  final String msg;
+
+  DeleteEmployeeBlocEmmitedError({required this.msg});
+}

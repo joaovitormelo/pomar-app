@@ -16,7 +16,7 @@ class FormLogin extends StatelessWidget with InputValidationMixin {
         children: [
           FormBuilderTextField(
             name: 'email',
-            validator: (email) => validateEmail(email as String),
+            validator: (email) => validateEmail(email),
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: const InputDecoration(
               prefixIcon: Icon(Icons.email),

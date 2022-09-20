@@ -13,4 +13,8 @@ class ServerRoutes {
       ServerRouteInfo(path: "employees", method: "get");
   static ServerRouteInfo createEmployee =
       ServerRouteInfo(path: "employee", method: "post");
+  static ServerRouteInfo updateEmployee =
+      ServerRouteInfo(path: "employee", method: "put");
+  static ServerRouteInfo deleteEmployee =
+      ServerRouteInfo(path: "employee", method: "delete");
 }

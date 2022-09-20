@@ -8,7 +8,10 @@ mixin InputValidationMixin {
   final invalidCharacterRegex = RegExp(r'[^a-zA-Z\u00C0-\u00FF ]+');
   final notNumberRegex = RegExp(r'[^0-9]');
 
-  String? validatePassword(password, [extraValidation]) {
+  String? validatePassword(
+    password, {
+    extraValidation,
+  }) {
     if (password == null) {
       return "Informe uma senha";
     }

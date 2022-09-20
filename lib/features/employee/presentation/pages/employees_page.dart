@@ -1,21 +1,39 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/utils/Utils.dart';
-import 'package:pomar_app/features/employee/presentation/bloc/bloc.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
+import 'package:pomar_app/features/employee/domain/entities/employee.dart';
+import 'package:pomar_app/features/employee/domain/usecases/do_delete_employee.dart';
+import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
+
+const textEmployeesPageTitle = "Funcionários";
+const actionEditar = "Editar";
+const actionExcluir = "Excluir";
+const listEmployeeActions = [actionEditar, actionExcluir];
 
 class EmployeesPage extends StatelessWidget {
   const EmployeesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<EmployeesBloc>(
-      create: (_) => Globals.sl<EmployeesBloc>(),
-      child: const EmployeesBody(),
-    );
+    return Builder(builder: (context) {
+      EmployeesBloc employeesBloc = Globals.sl<EmployeesBloc>();
+      return MultiBlocProvider(
+        providers: [
+          BlocProvider<EmployeesBloc>(create: (_) => employeesBloc),
+          BlocProvider<DeleteEmployeeBloc>(
+            create: (_) => DeleteEmployeeBloc(
+              authBloc: Globals.sl<AuthBloc>(),
+              employeesBloc: employeesBloc,
+              doDeleteEmployee: Globals.sl<DoDeleteEmployee>(),
+            ),
+          ),
+        ],
+        child: const EmployeesBody(),
+      );
+    });
   }
 }
 
@@ -33,26 +51,43 @@ class _EmployeesBodyState extends State<EmployeesBody> {
     BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
   }
 
+  onEmployeeActionTapped(String action, Employee employee) {
+    if (action == actionEditar) {
+      Navigator.pushNamed(context, FluroRoutes.editEmployeeRoute,
+              arguments: employee)
+          .then((value) =>
+              BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees()));
+    } else {
+      BlocProvider.of<DeleteEmployeeBloc>(context).add(
+        DeleteEmployeeButtonPressed(idEmployee: employee.idEmployee),
+      );
+    }
+  }
+
   onAddEmployeeButtonPressed() {
-    Navigator.pushReplacementNamed(context, FluroRoutes.addEmployeeRoute);
+    Navigator.pushNamed(context, FluroRoutes.addEmployeeRoute).then((value) =>
+        BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Funcionários"),
+        title: const Text(textEmployeesPageTitle),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
         onPressed: onAddEmployeeButtonPressed,
+        child: const Icon(Icons.add),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: BlocConsumer<EmployeesBloc, EmployeesState>(
-          listenWhen: (_, state) => state is EmployeesError,
           listener: (context, state) {
-            Utils.showSnackBar(context, (state as EmployeesError).msg);
+            if (state is EmployeesError) {
+              Utils.showSnackBar(context, state.msg);
+            } else if (state is EmployeesOperationError) {
+              Utils.showSnackBar(context, state.msg);
+            }
           },
           builder: (context, state) {
             if (state is EmployeesHasData) {
@@ -65,23 +100,28 @@ class _EmployeesBodyState extends State<EmployeesBody> {
                     width: 30,
                     child: PopupMenuButton(
                       icon: const Icon(Icons.more_vert),
+                      onSelected: (String action) => onEmployeeActionTapped(
+                          action, state.employees[index]),
                       itemBuilder: (context) {
-                        return ['Editar']
+                        return listEmployeeActions
                             .map((String option) => PopupMenuItem(
-                                value: option, child: Text(option)))
+                                  value: option,
+                                  child: Text(option),
+                                ))
                             .toList();
                       },
                     ),
                   ),
                 ),
               );
-            } else if (state is EmployeesLoading) {
-              return Container(
+            } else if (state is EmployeesLoading ||
+                state is EmployeesOperationError) {
+              return const SizedBox(
                 height: double.infinity,
-                child: const Center(child: CircularProgressIndicator()),
+                child: Center(child: CircularProgressIndicator()),
               );
             } else if (state is EmployeesNoData) {
-              return Container(
+              return SizedBox(
                 height: double.infinity,
                 child: Center(
                   child: Row(
@@ -106,7 +146,7 @@ class _EmployeesBodyState extends State<EmployeesBody> {
                 ),
               );
             } else if (state is EmployeesError) {
-              return Container(
+              return SizedBox(
                 height: double.infinity,
                 child: Center(
                   child: Row(

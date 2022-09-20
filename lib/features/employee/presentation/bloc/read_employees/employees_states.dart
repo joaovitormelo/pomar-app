@@ -21,3 +21,9 @@ class EmployeesError extends EmployeesState {
 
   EmployeesError({required this.msg});
 }
+
+class EmployeesOperationError extends EmployeesState {
+  final String msg;
+
+  EmployeesOperationError({required this.msg});
+}
