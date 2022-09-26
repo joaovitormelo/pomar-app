@@ -4,6 +4,8 @@ import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/initializer.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 void main() async {
   await Initializer().init();
@@ -42,6 +44,13 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       initialRoute: FluroRoutes.loadingRoute,
       onGenerateRoute: FluroRoutes.router.generator,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        SfGlobalLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', "BR")],
+      locale: const Locale('pt', "BR"),
       home: Container(),
     );
   }

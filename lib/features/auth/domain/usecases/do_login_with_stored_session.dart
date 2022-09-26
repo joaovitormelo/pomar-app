@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:pomar_app/features/auth/domain/entities/session.dart';
 import 'package:pomar_app/features/auth/domain/repository/login_repository_contract.dart';
 
@@ -8,7 +10,6 @@ class DoLoginWithStoredSession {
 
   Future<Session?> call() async {
     Session? session = await loginRepository.getSavedSession();
-    //await loginRepository.validateSession(session);
     return session;
   }
 }

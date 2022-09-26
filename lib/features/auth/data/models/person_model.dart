@@ -18,7 +18,7 @@ class PersonModel extends Person with EquatableMixin {
 
   factory PersonModel.fromJSON(Map<String, dynamic> personJSON) {
     return PersonModel(
-        idPerson: personJSON["idPerson"],
+        idPerson: personJSON["id_person"],
         name: personJSON["name"],
         email: personJSON["email"],
         phone: personJSON["phone"]);

@@ -24,14 +24,14 @@ class EmployeeModel extends Employee with EquatableMixin {
 
   factory EmployeeModel.fromJSON(Map<String, dynamic> employeeJSON) {
     return EmployeeModel(
-      idEmployee: employeeJSON['idEmployee'],
+      idEmployee: employeeJSON['id_employee'],
       person: PersonModel.fromJSON(employeeJSON['person']),
     );
   }
 
   Map<String, dynamic> toJSON() {
     return {
-      "idEmployee": idEmployee,
+      "id_employee": idEmployee,
       "person": person.toJSON(),
     };
   }

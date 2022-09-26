@@ -4,6 +4,7 @@ import 'package:pomar_app/core/config/dio_config.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/features/auth/login_initializer.dart';
 import 'package:pomar_app/features/employee/employee_initializer.dart';
+import 'package:pomar_app/features/schedule/schedule_initializer.dart';
 
 class Initializer {
   Future<void> init() async {
@@ -12,5 +13,6 @@ class Initializer {
     Globals.sl.registerLazySingleton(() => dio);
     await LoginInitializer(sl: Globals.sl, dio: dio).init();
     await EmployeeInitializer(sl: Globals.sl, dio: dio).init();
+    await ScheduleInitializer(sl: Globals.sl, dio: dio).init();
   }
 }

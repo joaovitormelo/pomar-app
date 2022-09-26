@@ -39,7 +39,6 @@ class EmployeeServerSource implements EmployeeServerSourceContract {
       throw ConnectionError();
     }
     if (response.statusCode == 200) {
-      inspect(response.data);
       return (response.data as List)
           .map((employee) => EmployeeModel.fromJSON(employee))
           .toList();
