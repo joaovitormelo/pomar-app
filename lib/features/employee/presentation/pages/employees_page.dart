@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
+import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/Utils.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/employee/domain/usecases/do_delete_employee.dart';
 import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
 
+const textEmployeesLoadError = "Error";
 const textEmployeesPageTitle = "Funcionários";
 const actionEditar = "Editar";
 const actionExcluir = "Excluir";
@@ -146,29 +148,7 @@ class _EmployeesBodyState extends State<EmployeesBody> {
                 ),
               );
             } else if (state is EmployeesError) {
-              return SizedBox(
-                height: double.infinity,
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(
-                        Icons.warning,
-                        color: Colors.red,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text(
-                        "Erro",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return const ErrorDisplay(msg: textEmployeesLoadError);
             } else {
               return Container();
             }

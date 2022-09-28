@@ -3,30 +3,36 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pomar_app/core/config/globals.dart';
+import 'package:pomar_app/core/presentation/widgets/error_display.dart';
+import 'package:pomar_app/core/utils/utils.dart';
+import 'package:pomar_app/features/employee/domain/entities/employee.dart';
+import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/bloc.dart';
+import 'package:pomar_app/features/schedule/presentation/widgets/event_detail_modal.dart';
+import 'package:pomar_app/features/schedule/presentation/widgets/event_display.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
+const textScheduleLoadError = "Erro";
 const textScheduleAdminTitle = "Agenda";
-
-getDateTime(String dateTime) {
-  int year = int.parse(dateTime.substring(0, 4));
-  int month = int.parse(dateTime.substring(5, 7));
-  int day = int.parse(dateTime.substring(8, 10));
-  int hour = int.parse(dateTime.substring(11, 13));
-  int minutes = int.parse(dateTime.substring(14, 16));
-  return DateTime(year, month, day, hour, minutes);
-}
 
 class ScheduleAdminPage extends StatelessWidget {
   const ScheduleAdminPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ReadEventsBloc>(
-      create: (context) => Globals.sl<ReadEventsBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ReadEventsBloc>(
+          create: (context) => Globals.sl<ReadEventsBloc>(),
+        ),
+        BlocProvider<EmployeesBloc>(
+          create: (context) => Globals.sl<EmployeesBloc>(),
+        ),
+      ],
       child: const ScheduleAdminBody(),
     );
   }
@@ -40,111 +46,27 @@ class ScheduleAdminBody extends StatefulWidget {
 }
 
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
+  EventData? _selectedEvent;
+
   @override
   void initState() {
     super.initState();
     BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
+    BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
   }
 
-  _getEventDataSource(List<EventModel> source) {
+  _getEventDataSource(List<EventData> source) {
     return EventDataSource(source);
   }
 
-  Widget _getEventView(EventModel event) {
-    String textTime = '';
-    if (event.eventInfo.endTime != null) {
-      String endTime = event.eventInfo.endTime as String;
-      textTime =
-          '${event.eventInfo.initTime.substring(0, 5)} - ${endTime.substring(0, 5)}';
-    } else {
-      textTime = event.eventInfo.initTime.substring(0, 5);
-    }
-    late Color color;
-    if (event.eventInfo.isTask) {
-      color = Colors.green;
-    } else {
-      color = Colors.blue;
-    }
-    List<Widget> eventColumnComposition = [
-      event.eventInfo.isRoutine
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  event.eventInfo.title,
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      decoration:
-                          TextDecoration.none), //TextDecoration.lineThrough
-                ),
-                const Icon(
-                  FontAwesomeIcons.arrowsRotate,
-                  color: Colors.white,
-                  size: 13,
-                ),
-              ],
-            )
-          : Text(
-              event.eventInfo.title,
-              textAlign: TextAlign.left,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-            ),
-    ];
-    if (!event.eventInfo.allDay) {
-      eventColumnComposition.add(Text(
-        textTime,
-        textAlign: TextAlign.left,
-        style: const TextStyle(color: Colors.white, fontSize: 13),
-      ));
-    }
-    List<Widget> eventRowComposition = [];
-    if (event.eventInfo.isTask) {
-      eventRowComposition.add(
-        Padding(
-          padding: const EdgeInsets.all(5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                child: const Icon(
-                  Icons.check_box_outlined,
-                  size: 18,
-                  color: Colors.white,
-                ),
-              ),
-              const Text(
-                "(1/2)",
-                style: TextStyle(fontSize: 10, color: Colors.white),
-              )
-            ],
-          ),
-        ),
-      );
-    }
-    eventRowComposition.add(Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: eventColumnComposition,
-        ),
-      ),
-    ));
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.rectangle,
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-      ),
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-        child: Row(
-          children: eventRowComposition,
-        ),
+  _onEventPressed(EventData eventD, List<Employee> employeeList) {
+    showBarModalBottomSheet(
+      context: context,
+      expand: false,
+      topControl: Container(),
+      builder: (context) => EventDetailModal(
+        eventD: eventD,
+        employeeList: employeeList,
       ),
     );
   }
@@ -155,94 +77,113 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
       appBar: AppBar(
         title: const Text(textScheduleAdminTitle),
       ),
-      body: BlocBuilder<ReadEventsBloc, ReadEventsState>(
-        builder: (context, state) {
-          if (state is ReadEventsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (state is ReadEventsHasData) {
-            return SfCalendar(
-              view: CalendarView.month,
-              allowedViews: const [
-                CalendarView.month,
-                CalendarView.schedule,
-              ],
-              showNavigationArrow: true,
-              monthViewSettings: const MonthViewSettings(
-                showAgenda: true,
-              ),
-              dataSource: _getEventDataSource(state.eventList),
-              initialSelectedDate: DateTime.now(),
-              appointmentBuilder: (context, details) {
-                late EventModel event;
-                if (details.appointments.first is EventModel) {
-                  event = details.appointments.first as EventModel;
-                } else {
-                  final appointment = details.appointments.first as Appointment;
-                  state.eventList.map((EventModel e) {
-                    if (e.idEvent == appointment.id) {
-                      event = e;
-                    }
-                  }).toList();
-                }
-                return _getEventView(event);
-              },
-            );
-          } else if (state is ReadEventsError) {
-            return Container();
-          } else {
-            return Container();
+      body: Builder(builder: (context) {
+        final readEventsState = context.watch<ReadEventsBloc>().state;
+        final employeesState = context.watch<EmployeesBloc>().state;
+
+        if (readEventsState is ReadEventsError) {
+          Utils.showSnackBar(context, readEventsState.msg);
+          return const ErrorDisplay(msg: textScheduleLoadError);
+        } else if (employeesState is EmployeesError) {
+          Utils.showSnackBar(context, employeesState.msg);
+          return const ErrorDisplay(msg: textScheduleLoadError);
+        } else if (readEventsState is ReadEventsLoading ||
+            employeesState is EmployeesLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (readEventsState is ReadEventsNoData) {
+          return Container();
+        } else {
+          List<EventData> eventDataList =
+              (readEventsState as ReadEventsHasData).eventList;
+          List<Employee> employeeList = [];
+          if (employeesState is EmployeesHasData) {
+            employeeList = employeesState.employees;
           }
-        },
-      ),
+          return SfCalendar(
+            view: CalendarView.month,
+            allowedViews: const [
+              CalendarView.month,
+              CalendarView.schedule,
+            ],
+            showNavigationArrow: true,
+            monthViewSettings: const MonthViewSettings(
+              showAgenda: true,
+            ),
+            dataSource: _getEventDataSource(eventDataList),
+            initialSelectedDate: DateTime.now(),
+            appointmentBuilder: (context, details) {
+              late EventData eventD;
+              if (details.appointments.first is EventData) {
+                eventD = details.appointments.first as EventData;
+              } else {
+                final appointment = details.appointments.first as Appointment;
+                eventDataList.map((EventData e) {
+                  if (e.event.idEvent == appointment.id) {
+                    eventD = e;
+                  }
+                }).toList();
+              }
+              return EventDisplay(
+                eventD: eventD,
+                onEventPressed: () {
+                  _onEventPressed(eventD, employeeList);
+                },
+              );
+            },
+          );
+        }
+      }),
     );
   }
 }
 
 class EventDataSource extends CalendarDataSource {
-  EventDataSource(source) {
+  EventDataSource(List<EventData> source) {
     appointments = source;
   }
 
   @override
   Object? getId(int index) {
-    return appointments![index].idEvent;
+    return appointments![index].event.idEvent;
   }
 
   @override
   DateTime getStartTime(int index) {
-    EventModel event = appointments![index];
+    EventModel event = appointments![index].event;
     DateTime initDateTime =
-        getDateTime("${event.date} ${event.eventInfo.initTime}");
+        Utils.strToDateTime("${event.date} ${event.eventInfo.initTime}");
     return initDateTime;
   }
 
   @override
   DateTime getEndTime(int index) {
-    EventModel event = appointments![index];
+    EventModel event = appointments![index].event;
     DateTime endDateTime;
     if (event.eventInfo.endTime != null) {
-      endDateTime = getDateTime("${event.date} ${event.eventInfo.endTime}");
+      endDateTime =
+          Utils.strToDateTime("${event.date} ${event.eventInfo.endTime}");
     } else {
-      endDateTime = getDateTime("${event.date} ${event.eventInfo.initTime}");
+      endDateTime =
+          Utils.strToDateTime("${event.date} ${event.eventInfo.initTime}");
     }
     return endDateTime;
   }
 
   @override
   bool isAllDay(int index) {
-    return appointments![index].eventInfo.allDay;
+    return appointments![index].event.eventInfo.allDay;
   }
 
   @override
   String getSubject(int index) {
-    return appointments![index].eventInfo.title;
+    return appointments![index].event.eventInfo.title;
   }
 
   @override
   String? getRecurrenceRule(int index) {
-    EventModel event = appointments![index];
+    EventModel event = appointments![index].event;
     if (!event.eventInfo.isRoutine) {
       return null;
     } else {

@@ -24,7 +24,7 @@ class ReadEventsBloc extends Bloc<ReadEventsEvent, ReadEventsState> {
     Session session = (authBloc.state as AuthorizedAdmin).session;
     emit(ReadEventsLoading());
     try {
-      List<EventModel> eventList = await doReadEvents(session.jwtToken);
+      List<EventData> eventList = await doReadEvents(session.jwtToken);
       emit(ReadEventsHasData(eventList: eventList));
     } catch (e) {
       inspect(e);

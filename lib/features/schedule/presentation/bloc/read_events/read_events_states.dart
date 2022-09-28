@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:pomar_app/features/schedule/data/models/event_model.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 
 class ReadEventsState extends Equatable {
   @override
@@ -11,7 +11,7 @@ class ReadEventsNoData extends ReadEventsState {}
 class ReadEventsLoading extends ReadEventsState {}
 
 class ReadEventsHasData extends ReadEventsState {
-  final List<EventModel> eventList;
+  final List<EventData> eventList;
 
   ReadEventsHasData({required this.eventList});
 }

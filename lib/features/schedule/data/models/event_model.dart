@@ -15,7 +15,6 @@ class EventModel extends Equatable {
   });
 
   factory EventModel.fromJSON(Map<String, dynamic> event) {
-    inspect(event);
     return EventModel(
       idEvent: event['id_event'],
       eventInfo: EventInfoModel.fromJSON(event['event_info']),

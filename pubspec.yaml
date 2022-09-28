@@ -56,6 +56,7 @@ dependencies:
   syncfusion_localizations: ^20.2.50
   flutter_localizations:
     sdk: flutter
+  modal_bottom_sheet: ^2.1.2
 
 flutter_localizations:
   sdk: flutter

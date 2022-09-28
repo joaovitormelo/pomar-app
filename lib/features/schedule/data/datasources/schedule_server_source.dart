@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:pomar_app/core/config/server_routes.dart';
 import 'package:pomar_app/core/errors/errors.dart';
+import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 
 class ScheduleServerSource {
   final Dio dio;
@@ -25,9 +29,17 @@ class ScheduleServerSource {
       throw ConnectionError();
     }
     if (response.statusCode == 200) {
-      return (response.data as List)
-          .map((event) => EventModel.fromJSON(event))
-          .toList();
+      List<EventData> eventDataList =
+          (response.data as List).map<EventData>((eventData) {
+        List<AssignmentModel> assignments = eventData['assignments']
+            .map<AssignmentModel>(
+                (assignment) => AssignmentModel.fromJSON(assignment))
+            .toList();
+        return EventData(
+            event: EventModel.fromJSON(eventData['event']),
+            assignments: assignments);
+      }).toList();
+      return eventDataList;
     } else {
       throw mapServerResponseToError(response.statusCode, response.data);
     }
