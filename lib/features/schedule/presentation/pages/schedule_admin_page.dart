@@ -1,10 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pomar_app/core/config/globals.dart';
+import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
@@ -46,8 +45,6 @@ class ScheduleAdminBody extends StatefulWidget {
 }
 
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
-  EventData? _selectedEvent;
-
   @override
   void initState() {
     super.initState();
@@ -76,6 +73,12 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(textScheduleAdminTitle),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed(FluroRoutes.addEventRoute);
+        },
+        child: const Icon(Icons.add),
       ),
       body: Builder(builder: (context) {
         final readEventsState = context.watch<ReadEventsBloc>().state;

@@ -95,7 +95,7 @@ class EventDetailModal extends StatelessWidget {
     if (event.eventInfo.allDay) {
       textTime += "Dia todo";
     } else {
-      textTime += event.eventInfo.initTime.substring(0, 5);
+      textTime += (event.eventInfo.initTime as String).substring(0, 5);
       if (event.eventInfo.endTime != null) {
         String endTime = (event.eventInfo.endTime as String).substring(0, 5);
         textTime += " às $endTime";
@@ -150,7 +150,7 @@ class EventDetailModal extends StatelessWidget {
     }).toList();
 
     bool isCompleted = false;
-    if (event.eventInfo.isCollective) {
+    if (event.eventInfo.isCollective as bool) {
       if (completedCount > 0) {
         isCompleted = true;
       }
@@ -227,7 +227,7 @@ class EventDetailModal extends StatelessWidget {
           const Icon(
             Icons.info_outline,
             color: Colors.grey,
-            size: 20,
+            size: 25,
           ),
           const SizedBox(
             width: 10,

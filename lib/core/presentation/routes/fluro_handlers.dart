@@ -9,6 +9,7 @@ import 'package:pomar_app/features/employee/presentation/pages/edit_employee_pag
 import 'package:pomar_app/features/employee/presentation/pages/employees_page.dart';
 import 'package:pomar_app/features/home/presentation/pages/home_admin_page.dart';
 import 'package:pomar_app/features/home/presentation/pages/home_employee_page.dart';
+import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/schedule_admin_page.dart';
 
 class FluroHandlers {
@@ -34,6 +35,9 @@ class FluroHandlers {
       return EditEmployeePage(employee: args);
     },
   );
+  //SCHEDULE
   static Handler scheduleAdminHandler =
       Handler(handlerFunc: (context, params) => const ScheduleAdminPage());
+  static Handler addEventHandler =
+      Handler(handlerFunc: (context, params) => const AddEventPage());
 }

@@ -24,4 +24,6 @@ class ServerRoutes {
   //SCHEDULE
   static ServerRouteInfo readEvents =
       ServerRouteInfo(path: "events", method: "get");
+  static ServerRouteInfo addEvent =
+      ServerRouteInfo(path: "event", method: "post");
 }

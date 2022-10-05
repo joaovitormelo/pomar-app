@@ -52,11 +52,11 @@ dependencies:
   flutter_masked_text: ^0.8.0
   easy_mask: ^2.0.1
   brasil_fields: ^1.5.0
-  syncfusion_flutter_calendar: ^20.2.50
-  syncfusion_localizations: ^20.2.50
   flutter_localizations:
     sdk: flutter
   modal_bottom_sheet: ^2.1.2
+  syncfusion_localizations: ^20.3.47
+  syncfusion_flutter_calendar: ^20.3.47
 
 flutter_localizations:
   sdk: flutter

@@ -3,12 +3,12 @@ import 'package:equatable/equatable.dart';
 class EventInfoModel extends Equatable {
   final int idEventInfo;
   final String title;
-  final String initTime;
+  final String? initTime;
   final String? endTime;
   final bool allDay;
   final String description;
   final bool isTask;
-  final bool isCollective;
+  final bool? isCollective;
   final bool isRoutine;
   final String? initDate;
   final String? frequency;

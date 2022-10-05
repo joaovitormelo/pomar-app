@@ -13,22 +13,27 @@ class FluroRoutes {
   static String addEmployeeRoute = "addEmployee";
   static String editEmployeeRoute = "editEmployee";
   static String scheduleAdminRoute = "scheduleAdmin";
+  static String addEventRoute = "addEvent";
 
   static void setupRouter() {
     router.notFoundHandler =
         Handler(handlerFunc: (context, Map<String, dynamic> params) {
       return const LoadingPage();
     });
+    //AUTH
     router.define(loadingRoute, handler: FluroHandlers.loadingHandler);
     router.define(loginRoute, handler: FluroHandlers.loginHandler);
     router.define(homeAdminRoute, handler: FluroHandlers.homeAdminHandler);
+    //EMPLOYEE
     router.define(homeEmployeeRoute,
         handler: FluroHandlers.homeEmployeeHandler);
     router.define(employeesRoute, handler: FluroHandlers.employeesHandler);
     router.define(addEmployeeRoute, handler: FluroHandlers.addEmployeeHandler);
     router.define(editEmployeeRoute,
         handler: FluroHandlers.editEmployeeHandler);
+    //SCHEDULE
     router.define(scheduleAdminRoute,
         handler: FluroHandlers.scheduleAdminHandler);
+    router.define(addEventRoute, handler: FluroHandlers.addEventHandler);
   }
 }

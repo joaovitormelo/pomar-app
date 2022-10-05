@@ -66,7 +66,7 @@ class _EmployeeFormState extends State<EmployeeForm> with InputValidationMixin {
         name: 'name',
         controller: widget.controllers?.nameController,
         decoration: const InputDecoration(
-          prefixIcon: Icon(Icons.email),
+          prefixIcon: Icon(Icons.person),
           border: OutlineInputBorder(),
           labelText: "Nome",
         ),

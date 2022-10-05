@@ -14,12 +14,10 @@ class EventDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     String textTime = '';
     EventModel event = eventD.event;
-    if (event.eventInfo.endTime != null) {
+    if (event.eventInfo.initTime != null && event.eventInfo.endTime != null) {
       String endTime = event.eventInfo.endTime as String;
       textTime =
-          '${event.eventInfo.initTime.substring(0, 5)} - ${endTime.substring(0, 5)}';
-    } else {
-      textTime = event.eventInfo.initTime.substring(0, 5);
+          '${(event.eventInfo.initTime as String).substring(0, 5)} - ${endTime.substring(0, 5)}';
     }
     late Color color;
     if (event.eventInfo.isTask) {
