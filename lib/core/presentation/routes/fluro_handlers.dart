@@ -38,6 +38,11 @@ class FluroHandlers {
   //SCHEDULE
   static Handler scheduleAdminHandler =
       Handler(handlerFunc: (context, params) => const ScheduleAdminPage());
-  static Handler addEventHandler =
-      Handler(handlerFunc: (context, params) => const AddEventPage());
+  static Handler addEventHandler = Handler(
+    handlerFunc: (context, params) {
+      final dynamic args =
+          ModalRoute.of(context as BuildContext)?.settings.arguments;
+      return AddEventPage(employeeList: args);
+    },
+  );
 }

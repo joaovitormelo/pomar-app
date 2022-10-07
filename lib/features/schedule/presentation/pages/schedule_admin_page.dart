@@ -8,9 +8,9 @@ import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
-import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/bloc.dart';
+import 'package:pomar_app/features/schedule/presentation/helpers/event_data_source.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_detail_modal.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_display.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -74,12 +74,30 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
       appBar: AppBar(
         title: const Text(textScheduleAdminTitle),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed(FluroRoutes.addEventRoute);
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: Builder(builder: (context) {
+        final readEventsState = context.watch<ReadEventsBloc>().state;
+        final employeesState = context.watch<EmployeesBloc>().state;
+
+        if (readEventsState is ReadEventsHasData &&
+            employeesState is EmployeesHasData) {
+          return FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                FluroRoutes.addEventRoute,
+                arguments: employeesState.employees,
+              ).then(
+                (value) => BlocProvider.of<EmployeesBloc>(context).add(
+                  LoadEmployees(),
+                ),
+              );
+            },
+            child: const Icon(Icons.add),
+          );
+        } else {
+          return Container();
+        }
+      }),
       body: Builder(builder: (context) {
         final readEventsState = context.watch<ReadEventsBloc>().state;
         final employeesState = context.watch<EmployeesBloc>().state;
@@ -139,77 +157,5 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
         }
       }),
     );
-  }
-}
-
-class EventDataSource extends CalendarDataSource {
-  EventDataSource(List<EventData> source) {
-    appointments = source;
-  }
-
-  @override
-  Object? getId(int index) {
-    return appointments![index].event.idEvent;
-  }
-
-  @override
-  DateTime getStartTime(int index) {
-    EventModel event = appointments![index].event;
-    DateTime initDateTime =
-        Utils.strToDateTime("${event.date} ${event.eventInfo.initTime}");
-    return initDateTime;
-  }
-
-  @override
-  DateTime getEndTime(int index) {
-    EventModel event = appointments![index].event;
-    DateTime endDateTime;
-    if (event.eventInfo.endTime != null) {
-      endDateTime =
-          Utils.strToDateTime("${event.date} ${event.eventInfo.endTime}");
-    } else {
-      endDateTime =
-          Utils.strToDateTime("${event.date} ${event.eventInfo.initTime}");
-    }
-    return endDateTime;
-  }
-
-  @override
-  bool isAllDay(int index) {
-    return appointments![index].event.eventInfo.allDay;
-  }
-
-  @override
-  String getSubject(int index) {
-    return appointments![index].event.eventInfo.title;
-  }
-
-  @override
-  String? getRecurrenceRule(int index) {
-    EventModel event = appointments![index].event;
-    if (!event.eventInfo.isRoutine) {
-      return null;
-    } else {
-      String recurrenceRule = "";
-      if (event.eventInfo.frequency == "D") {
-        recurrenceRule += 'FREQ=DAILY;';
-      } else if (event.eventInfo.frequency == "W") {
-        recurrenceRule += 'FREQ=WEEKLY;BYDAY=FR;';
-      } else if (event.eventInfo.frequency == "M") {
-        recurrenceRule += 'FREQ=MONTHLY;';
-      }
-      recurrenceRule += "INTERVAL=${event.eventInfo.interval};";
-      if (event.eventInfo.times != null) {
-        recurrenceRule += "COUNT=${event.eventInfo.times}";
-      } else {
-        String endDate = event.eventInfo.endDate as String;
-        int year = int.parse(endDate.substring(0, 4));
-        int month = int.parse(endDate.substring(5, 7));
-        int day = int.parse(endDate.substring(8, 10));
-        DateTime endDateTime = DateTime(year, month, day);
-        recurrenceRule += "UNTIL=${endDateTime.toIso8601String()}";
-      }
-      return recurrenceRule;
-    }
   }
 }

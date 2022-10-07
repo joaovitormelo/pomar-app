@@ -1,13 +1,7 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
-import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
-import 'package:pomar_app/core/utils/Utils.dart';
-import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
 
 class EmployeeFieldsKeys {
   final GlobalKey<FormBuilderFieldState> passwordKey;

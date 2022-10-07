@@ -1,16 +1,10 @@
-import 'dart:developer';
-
 import 'package:brasil_fields/brasil_fields.dart';
-import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/config/globals.dart';
-import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/auth/domain/entities/person.dart';
-import 'package:pomar_app/features/auth/domain/entities/user.dart';
-import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
 import 'package:pomar_app/features/employee/domain/usecases/do_update_employee.dart';

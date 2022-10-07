@@ -55,10 +55,15 @@ class _EmployeesBodyState extends State<EmployeesBody> {
 
   onEmployeeActionTapped(String action, Employee employee) {
     if (action == actionEditar) {
-      Navigator.pushNamed(context, FluroRoutes.editEmployeeRoute,
-              arguments: employee)
-          .then((value) =>
-              BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees()));
+      Navigator.pushNamed(
+        context,
+        FluroRoutes.editEmployeeRoute,
+        arguments: employee,
+      ).then(
+        (value) => BlocProvider.of<EmployeesBloc>(context).add(
+          LoadEmployees(),
+        ),
+      );
     } else {
       BlocProvider.of<DeleteEmployeeBloc>(context).add(
         DeleteEmployeeButtonPressed(idEmployee: employee.idEmployee),

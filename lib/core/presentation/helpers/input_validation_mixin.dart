@@ -8,13 +8,14 @@ mixin InputValidationMixin {
   final invalidCharacterRegex = RegExp(r'[^a-zA-Z\u00C0-\u00FF ]+');
   final notNumberRegex = RegExp(r'[^0-9]');
 
-  String? validateString(str, min, max, {required = true}) {
+  String? validateString(str, min, max,
+      {required = true, emptyText = "Informe um valor"}) {
     if (str == null && required) {
-      return "Informe um valor";
+      return emptyText;
     }
     str = str as String;
     if (str.isEmpty && required) {
-      return "Informe um valor";
+      return emptyText;
     }
     if (str.length < min && required) {
       return "Deve conter $min caracteres no mínimo";

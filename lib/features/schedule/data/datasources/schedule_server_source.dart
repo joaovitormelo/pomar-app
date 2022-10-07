@@ -27,7 +27,6 @@ class ScheduleServerSource {
         options: options,
       );
     } catch (e) {
-      print("HERE");
       print(e);
       throw ConnectionError();
     }
