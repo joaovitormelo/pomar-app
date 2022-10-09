@@ -1,3 +1,4 @@
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:pomar_app/core/utils/Utils.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
@@ -16,23 +17,21 @@ class EventDataSource extends CalendarDataSource {
   @override
   DateTime getStartTime(int index) {
     EventModel event = appointments![index].event;
-    DateTime initDateTime =
-        Utils.strToDateTime("${event.date} ${event.eventInfo.initTime}");
-    return initDateTime;
+    if (event.eventInfo.initTime == null) {
+      return DateFormat("yyyy-MM-dd").parse(event.date);
+    } else {
+      return DateFormat("hh:mm:ss").parse(event.eventInfo.initTime as String);
+    }
   }
 
   @override
   DateTime getEndTime(int index) {
     EventModel event = appointments![index].event;
-    DateTime endDateTime;
-    if (event.eventInfo.endTime != null) {
-      endDateTime =
-          Utils.strToDateTime("${event.date} ${event.eventInfo.endTime}");
+    if (event.eventInfo.endTime == null) {
+      return DateFormat("yyyy-MM-dd").parse(event.date);
     } else {
-      endDateTime =
-          Utils.strToDateTime("${event.date} ${event.eventInfo.initTime}");
+      return DateFormat("hh:mm:ss").parse(event.eventInfo.endTime as String);
     }
-    return endDateTime;
   }
 
   @override
@@ -58,6 +57,8 @@ class EventDataSource extends CalendarDataSource {
         recurrenceRule += 'FREQ=WEEKLY;BYDAY=FR;';
       } else if (event.eventInfo.frequency == "M") {
         recurrenceRule += 'FREQ=MONTHLY;';
+      } else if (event.eventInfo.frequency == "Y") {
+        recurrenceRule += 'FREQ=YEARLY;';
       }
       recurrenceRule += "INTERVAL=${event.eventInfo.interval};";
       if (event.eventInfo.times != null) {

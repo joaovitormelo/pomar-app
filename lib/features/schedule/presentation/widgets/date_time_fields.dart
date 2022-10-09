@@ -4,24 +4,33 @@ import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
+import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
 
 class DateTimeFieldsVariables {
+  final bool allDay;
   final bool isRoutine;
   final String frequency;
+  final EndMode endMode;
 
   DateTimeFieldsVariables({
+    required this.allDay,
     required this.isRoutine,
     required this.frequency,
+    required this.endMode,
   });
 }
 
 class DateTimeFieldsSetters {
+  final setAllDay;
   final setIsRoutine;
   final setFrequency;
+  final setEndMode;
 
   DateTimeFieldsSetters({
+    required this.setAllDay,
     required this.setIsRoutine,
     required this.setFrequency,
+    required this.setEndMode,
   });
 }
 
@@ -163,6 +172,10 @@ class _DateTimeFieldsState extends State<DateTimeFields>
     widget.setters.setIsRoutine(value);
   }
 
+  onAllDayChanged(value) {
+    widget.setters.setAllDay(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
@@ -187,44 +200,72 @@ class _DateTimeFieldsState extends State<DateTimeFields>
       const SizedBox(
         height: 30,
       ),
-      Row(
-        children: [
-          Expanded(
-            child: FormBuilderTextField(
-              name: "init_time",
-              controller: widget.controllers.initTime,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.alarm),
-                border: OutlineInputBorder(),
-                labelText: "Hora Início",
-              ),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (description) => validateString(description, 0, 500),
-              readOnly: true,
-              onTap: onInitTimePickerTapped,
-            ),
+      FormBuilderSwitch(
+        name: "all_day",
+        title: const Text(
+          "Dia todo?",
+          style: TextStyle(fontSize: 15),
+        ),
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 10,
           ),
-          const SizedBox(
-            width: 30,
+          prefixIcon: Icon(
+            FontAwesomeIcons.calendarDay,
+            size: 20,
           ),
-          Expanded(
-            child: FormBuilderTextField(
-              name: "end_time",
-              controller: widget.controllers.endTime,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.alarm),
-                border: OutlineInputBorder(),
-                labelText: "Hora Fim",
-              ),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (description) => validateString(description, 0, 500),
-              readOnly: true,
-              onTap: onEndTimePickerTapped,
-              enabled: endTimeIsEnabled,
-            ),
-          ),
-        ],
+        ),
+        onChanged: onAllDayChanged,
       ),
+    ];
+    if (!widget.variables.allDay) {
+      children.addAll([
+        const SizedBox(
+          height: 30,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: FormBuilderTextField(
+                name: "init_time",
+                controller: widget.controllers.initTime,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.alarm),
+                  border: OutlineInputBorder(),
+                  labelText: "Hora Início",
+                ),
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (description) => validateString(description, 0, 500),
+                readOnly: true,
+                onTap: onInitTimePickerTapped,
+              ),
+            ),
+            const SizedBox(
+              width: 30,
+            ),
+            Expanded(
+              child: FormBuilderTextField(
+                name: "end_time",
+                controller: widget.controllers.endTime,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.alarm),
+                  border: OutlineInputBorder(),
+                  labelText: "Hora Fim",
+                ),
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (description) => validateString(description, 0, 500),
+                readOnly: true,
+                onTap: onEndTimePickerTapped,
+                enabled: endTimeIsEnabled,
+              ),
+            ),
+          ],
+        ),
+      ]);
+    }
+    children.addAll([
       const SizedBox(
         height: 30,
       ),
@@ -264,7 +305,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
         ),
         onChanged: onIsRoutineChanged,
       ),
-    ];
+    ]);
 
     if (widget.variables.isRoutine) {
       children.addAll(
@@ -349,9 +390,16 @@ class _DateTimeFieldsState extends State<DateTimeFields>
                 children: [
                   Container(
                     color: Colors.blue,
-                    child: const TabBar(
+                    child: TabBar(
+                      onTap: (value) {
+                        if (value == 1) {
+                          widget.setters.setEndMode(EndMode.times);
+                        } else {
+                          widget.setters.setEndMode(EndMode.endDate);
+                        }
+                      },
                       indicatorColor: Colors.white,
-                      tabs: [
+                      tabs: const [
                         Tab(
                           text: "Até Dia",
                         ),

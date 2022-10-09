@@ -1,13 +1,23 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
+import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
+import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
+import 'package:pomar_app/features/schedule/data/models/event_info_model.dart';
+import 'package:pomar_app/features/schedule/data/models/event_model.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_add_event.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_bloc.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_events.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_states.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_form.dart';
+
+enum EndMode {
+  endDate,
+  times,
+}
 
 class AddEventPage extends StatelessWidget {
   final List<Employee> employeeList;
@@ -48,14 +58,16 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
     endDate: TextEditingController(),
     description: TextEditingController(text: ""),
   );
+  bool allDay = false;
   bool isRoutineIsEnabled = false;
   bool isRoutine = false;
   String frequency = "";
-  bool endTimeIsEnabled = false;
+  EndMode endMode = EndMode.endDate;
   bool isTask = false;
   bool isCollective = false;
   List<Employee> employeeList = [];
   List<Employee> assignedEmployees = [];
+  late BuildContext loadingModalContext;
 
   @override
   void initState() {
@@ -63,9 +75,21 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
     employeeList = widget.employeeList;
   }
 
+  setAllDay(value) {
+    setState(() {
+      allDay = value;
+    });
+  }
+
   setIsRoutine(value) {
     setState(() {
       isRoutine = value;
+    });
+  }
+
+  setEndMode(value) {
+    setState(() {
+      endMode = value;
     });
   }
 
@@ -102,12 +126,84 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   onSubmit() {
     if (_formKey.currentState!.validate()) {
       String title = controllers.title.text;
-      String initTime = controllers.initTime.text;
-      String endTime = controllers.endTime.text;
-      String date = controllers.date.text;
-      String endDate = controllers.endDate.text;
-      String times = controllers.times.text;
-      print("SEnd");
+      String? initTime = controllers.initTime.text;
+      String? endTime = controllers.endTime.text;
+      String date = DateFormat("yyyy-MM-dd").format(
+        DateFormat("dd/MM/yyyy").parse(
+          controllers.date.text,
+        ),
+      );
+      String intervalStr = controllers.interval.text;
+      String endDateStr = controllers.endDate.text;
+      String timesStr = controllers.times.text;
+      String description = controllers.description.text;
+
+      int? interval;
+      int? times;
+      String? endDate;
+      if (!allDay) {
+        initTime = "$initTime:00";
+        endTime = "$endTime:00";
+      } else {
+        initTime = null;
+        endTime = null;
+      }
+      if (isRoutine) {
+        interval = int.parse(intervalStr);
+        if (endMode == EndMode.endDate) {
+          endDate = DateFormat("yyyy-MM-dd").format(
+            DateFormat("dd/MM/yyyy").parse(
+              endDateStr,
+            ),
+          );
+          times = null;
+        } else {
+          times = int.parse(timesStr);
+          endDate = null;
+        }
+      }
+
+      EventModel event = EventModel(
+        idEvent: 0,
+        eventInfo: EventInfoModel(
+          idEventInfo: 0,
+          title: title,
+          initTime: initTime,
+          endTime: endTime,
+          allDay: allDay,
+          description: description,
+          isTask: isTask,
+          isCollective: isCollective,
+          isRoutine: isRoutine,
+          initDate: date,
+          frequency: frequency,
+          interval: interval,
+          weekDays: "",
+          endDate: endDate,
+          times: times,
+        ),
+        date: date,
+      );
+
+      List<AssignmentModel> assignmentList = assignedEmployees
+          .map(
+            (employee) => AssignmentModel(
+              idAssignment: 0,
+              idEvent: 0,
+              idEmployee: employee.idEmployee,
+              isCompleted: false,
+            ),
+          )
+          .toList();
+
+      BlocProvider.of<AddEventBloc>(context).add(
+        AddEventButtonPressed(
+          addEventParams: AddEventParams(
+            event: event,
+            assignmentList: assignmentList,
+          ),
+        ),
+      );
     }
   }
 
@@ -123,32 +219,65 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              EventForm(
-                formKey: _formKey,
-                controllers: controllers,
-                variables: EventFieldsVariables(
-                  isRoutine: isRoutine,
-                  frequency: frequency,
-                  isTask: isTask,
-                  isCollective: isCollective,
-                  employeeList: employeeList,
-                  assignedEmployees: assignedEmployees,
+      body: BlocListener<AddEventBloc, AddEventStates>(
+        listener: (_, state) {
+          if (state is AddEventError) {
+            Navigator.of(context).pop();
+            Utils.showSnackBar(context, state.msg);
+          } else if (state is AddEventLoading) {
+            showDialog(
+              context: context,
+              builder: (context) {
+                loadingModalContext = context;
+                return Center(
+                  child: Container(
+                    color: Colors.grey,
+                    width: 60,
+                    height: 60,
+                    padding: const EdgeInsets.all(5),
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          }
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                EventForm(
+                  formKey: _formKey,
+                  controllers: controllers,
+                  variables: EventFieldsVariables(
+                    allDay: allDay,
+                    isRoutine: isRoutine,
+                    endMode: endMode,
+                    frequency: frequency,
+                    isTask: isTask,
+                    isCollective: isCollective,
+                    employeeList: employeeList,
+                    assignedEmployees: assignedEmployees,
+                  ),
+                  setters: EventFieldsSetters(
+                    setAllDay: setAllDay,
+                    setIsRoutine: setIsRoutine,
+                    setEndMode: setEndMode,
+                    setFrequency: setFrequency,
+                    setIsTask: setIsTask,
+                    setIsCollective: setIsCollective,
+                    setEmployeeList: setEmployeeList,
+                    setAssignedEmployees: setAssignedEmployees,
+                  ),
                 ),
-                setters: EventFieldsSetters(
-                  setIsRoutine: setIsRoutine,
-                  setFrequency: setFrequency,
-                  setIsTask: setIsTask,
-                  setIsCollective: setIsCollective,
-                  setEmployeeList: setEmployeeList,
-                  setAssignedEmployees: setAssignedEmployees,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

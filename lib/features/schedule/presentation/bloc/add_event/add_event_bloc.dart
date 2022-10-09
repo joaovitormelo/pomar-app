@@ -18,8 +18,10 @@ class AddEventBloc extends Bloc<AddEventEvents, AddEventStates> {
 
   onAddEventButtonPressed(AddEventButtonPressed event, emit) async {
     Session session = (authBloc.state as AuthorizedAdmin).session;
+    emit(AddEventLoading());
     try {
       await doAddEvent(session.jwtToken, event.addEventParams);
+      emit(AddEventDefault());
     } catch (e) {
       emit(AddEventError(msg: mapErrorToMsg(e)));
     }

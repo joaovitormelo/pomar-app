@@ -30,9 +30,10 @@ class EventDisplay extends StatelessWidget {
       event.eventInfo.title,
       textAlign: TextAlign.left,
       style: const TextStyle(
-          color: Colors.white,
-          fontSize: 13,
-          decoration: TextDecoration.none), //TextDecoration.lineThrough
+        color: Colors.white,
+        fontSize: 13,
+        decoration: TextDecoration.none,
+      ),
     ));
     if (event.eventInfo.isRoutine) {
       row1Children.add(
@@ -94,13 +95,17 @@ class EventDisplay extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.rectangle,
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(4.0),
+          ),
         ),
         alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-          child: Row(
-            children: row2Children,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Row(
+              children: row2Children,
+            ),
           ),
         ),
       ),

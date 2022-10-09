@@ -45,6 +45,9 @@ class ScheduleAdminBody extends StatefulWidget {
 }
 
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
+  var _calendarView = CalendarView.month;
+  final _calendarController = CalendarController();
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +57,27 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
 
   _getEventDataSource(List<EventData> source) {
     return EventDataSource(source);
+  }
+
+  _buildAppointment(
+      details, List<EventData> eventDataList, List<Employee> employeeList) {
+    late EventData eventD;
+    if (details.appointments.first is EventData) {
+      eventD = details.appointments.first as EventData;
+    } else {
+      final appointment = details.appointments.first as Appointment;
+      eventDataList.map((EventData e) {
+        if (e.event.idEvent == appointment.id) {
+          eventD = e;
+        }
+      }).toList();
+    }
+    return EventDisplay(
+      eventD: eventD,
+      onEventPressed: () {
+        _onEventPressed(eventD, employeeList);
+      },
+    );
   }
 
   _onEventPressed(EventData eventD, List<Employee> employeeList) {
@@ -68,11 +92,93 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     );
   }
 
+  _changeCalendarView(CalendarView newView) {
+    _calendarController.view = newView;
+    setState(() {
+      _calendarView = newView;
+    });
+  }
+
+  _getAppBarActions(CalendarView calendarView) {
+    if (calendarView == CalendarView.month) {
+      return [
+        IconButton(
+          onPressed: () => _changeCalendarView(CalendarView.timelineDay),
+          icon: const Icon(Icons.calendar_today),
+        ),
+      ];
+    }
+    return [
+      IconButton(
+        onPressed: () => _changeCalendarView(CalendarView.month),
+        icon: const Icon(Icons.calendar_month),
+      ),
+    ];
+  }
+
+  _buildBody() {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ReadEventsBloc, ReadEventsState>(
+          listenWhen: (_, state) => state is ReadEventsError,
+          listener: (context, state) {
+            Utils.showSnackBar(context, (state as ReadEventsError).msg);
+          },
+        ),
+        BlocListener<EmployeesBloc, EmployeesState>(
+          listenWhen: (_, state) => state is EmployeesError,
+          listener: (context, state) {
+            Utils.showSnackBar(context, (state as EmployeesError).msg);
+          },
+        ),
+      ],
+      child: Builder(
+        builder: (context) {
+          final readEventsState = context.watch<ReadEventsBloc>().state;
+          final employeesState = context.watch<EmployeesBloc>().state;
+
+          if (readEventsState is ReadEventsError) {
+            return const ErrorDisplay(msg: textScheduleLoadError);
+          } else if (employeesState is EmployeesError) {
+            return const ErrorDisplay(msg: textScheduleLoadError);
+          } else if (readEventsState is ReadEventsLoading ||
+              employeesState is EmployeesLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (readEventsState is ReadEventsNoData) {
+            return Container();
+          } else {
+            List<EventData> eventDataList =
+                (readEventsState as ReadEventsHasData).eventList;
+            List<Employee> employeeList = [];
+            if (employeesState is EmployeesHasData) {
+              employeeList = employeesState.employees;
+            }
+            return SfCalendar(
+              view: CalendarView.month,
+              controller: _calendarController,
+              showNavigationArrow: true,
+              monthViewSettings: const MonthViewSettings(
+                showAgenda: true,
+              ),
+              dataSource: _getEventDataSource(eventDataList),
+              initialSelectedDate: DateTime.now(),
+              appointmentBuilder: (context, details) =>
+                  _buildAppointment(details, eventDataList, employeeList),
+            );
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(textScheduleAdminTitle),
+        actions: _getAppBarActions(_calendarView),
       ),
       floatingActionButton: Builder(builder: (context) {
         final readEventsState = context.watch<ReadEventsBloc>().state;
@@ -98,64 +204,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
           return Container();
         }
       }),
-      body: Builder(builder: (context) {
-        final readEventsState = context.watch<ReadEventsBloc>().state;
-        final employeesState = context.watch<EmployeesBloc>().state;
-
-        if (readEventsState is ReadEventsError) {
-          Utils.showSnackBar(context, readEventsState.msg);
-          return const ErrorDisplay(msg: textScheduleLoadError);
-        } else if (employeesState is EmployeesError) {
-          Utils.showSnackBar(context, employeesState.msg);
-          return const ErrorDisplay(msg: textScheduleLoadError);
-        } else if (readEventsState is ReadEventsLoading ||
-            employeesState is EmployeesLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (readEventsState is ReadEventsNoData) {
-          return Container();
-        } else {
-          List<EventData> eventDataList =
-              (readEventsState as ReadEventsHasData).eventList;
-          List<Employee> employeeList = [];
-          if (employeesState is EmployeesHasData) {
-            employeeList = employeesState.employees;
-          }
-          return SfCalendar(
-            view: CalendarView.month,
-            allowedViews: const [
-              CalendarView.month,
-              CalendarView.schedule,
-            ],
-            showNavigationArrow: true,
-            monthViewSettings: const MonthViewSettings(
-              showAgenda: true,
-            ),
-            dataSource: _getEventDataSource(eventDataList),
-            initialSelectedDate: DateTime.now(),
-            appointmentBuilder: (context, details) {
-              late EventData eventD;
-              if (details.appointments.first is EventData) {
-                eventD = details.appointments.first as EventData;
-              } else {
-                final appointment = details.appointments.first as Appointment;
-                eventDataList.map((EventData e) {
-                  if (e.event.idEvent == appointment.id) {
-                    eventD = e;
-                  }
-                }).toList();
-              }
-              return EventDisplay(
-                eventD: eventD,
-                onEventPressed: () {
-                  _onEventPressed(eventD, employeeList);
-                },
-              );
-            },
-          );
-        }
-      }),
+      body: _buildBody(),
     );
   }
 }

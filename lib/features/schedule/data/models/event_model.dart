@@ -25,7 +25,7 @@ class EventModel extends Equatable {
   Map<String, dynamic> toJSON() {
     return {
       "id_event": idEvent,
-      "event_info": eventInfo,
+      "event_info": eventInfo.toJSON(),
       "date": date,
     };
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
+import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/date_time_fields.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/task_fields.dart';
 
@@ -28,7 +29,9 @@ class EventFieldsControllers {
 }
 
 class EventFieldsVariables {
+  final bool allDay;
   final bool isRoutine;
+  final EndMode endMode;
   final String frequency;
   final bool isTask;
   final bool isCollective;
@@ -36,7 +39,9 @@ class EventFieldsVariables {
   final List<Employee> assignedEmployees;
 
   EventFieldsVariables({
+    required this.allDay,
     required this.isRoutine,
+    required this.endMode,
     required this.frequency,
     required this.isTask,
     required this.isCollective,
@@ -47,6 +52,8 @@ class EventFieldsVariables {
 
 class EventFieldsSetters {
   final setIsRoutine;
+  final setEndMode;
+  final setAllDay;
   final setFrequency;
   final setIsTask;
   final setIsCollective;
@@ -55,6 +62,8 @@ class EventFieldsSetters {
 
   EventFieldsSetters({
     required this.setIsRoutine,
+    required this.setEndMode,
+    required this.setAllDay,
     required this.setFrequency,
     required this.setIsTask,
     required this.setIsCollective,
@@ -113,10 +122,17 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
           endDate: controllers.endDate,
         ),
         variables: DateTimeFieldsVariables(
-            isRoutine: variables.isRoutine, frequency: variables.frequency),
+          allDay: variables.allDay,
+          isRoutine: variables.isRoutine,
+          frequency: variables.frequency,
+          endMode: variables.endMode,
+        ),
         setters: DateTimeFieldsSetters(
-            setIsRoutine: setters.setIsRoutine,
-            setFrequency: setters.setFrequency),
+          setAllDay: setters.setAllDay,
+          setIsRoutine: setters.setIsRoutine,
+          setFrequency: setters.setFrequency,
+          setEndMode: setters.setEndMode,
+        ),
       ),
       const SizedBox(
         height: 30,

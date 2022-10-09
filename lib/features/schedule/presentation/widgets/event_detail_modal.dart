@@ -173,9 +173,6 @@ class EventDetailModal extends StatelessWidget {
               : const Icon(FontAwesomeIcons.minus),
         ],
       ),
-      const SizedBox(
-        height: 10,
-      ),
     ]);
 
     assignments.map((AssignmentModel assignment) {
@@ -191,7 +188,10 @@ class EventDetailModal extends StatelessWidget {
       } else {
         statusText += 'Pendente';
       }
-      assignmentsColumnChildren.add(
+      assignmentsColumnChildren.addAll([
+        const SizedBox(
+          height: 10,
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -210,11 +210,11 @@ class EventDetailModal extends StatelessWidget {
             ),
             Text(
               "Status: $statusText",
-              style: TextStyle(fontSize: sizeInfoText),
+              style: const TextStyle(fontSize: sizeInfoText),
             ),
           ],
         ),
-      );
+      ]);
     }).toList();
 
     return assignmentsColumnChildren;

@@ -47,5 +47,28 @@ class ScheduleServerSource {
     }
   }
 
-  addEvent(String token, AddEventParams params) async {}
+  addEvent(String token, AddEventParams params) async {
+    Options options = Options(
+      method: ServerRoutes.addEvent.method,
+      headers: {
+        "Authorization": token,
+      },
+    );
+    Response response;
+    try {
+      response = await dio
+          .request(ServerRoutes.addEvent.path, options: options, data: {
+        "event": params.event.toJSON(),
+        "assignment_list": params.assignmentList
+            .map((assignment) => assignment.toJSON())
+            .toList(),
+      });
+    } catch (e) {
+      print(e);
+      throw ConnectionError();
+    }
+    if (response.statusCode != 200) {
+      throw mapServerResponseToError(response.statusCode, response.data);
+    }
+  }
 }
