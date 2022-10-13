@@ -1,5 +1,6 @@
+import 'dart:developer';
+
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
-import 'package:pomar_app/core/utils/Utils.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -57,7 +58,7 @@ class EventDataSource extends CalendarDataSource {
         recurrenceRule += 'FREQ=WEEKLY;BYDAY=FR;';
       } else if (event.eventInfo.frequency == "M") {
         recurrenceRule += 'FREQ=MONTHLY;';
-      } else if (event.eventInfo.frequency == "Y") {
+      } else {
         recurrenceRule += 'FREQ=YEARLY;';
       }
       recurrenceRule += "INTERVAL=${event.eventInfo.interval};";
@@ -65,13 +66,18 @@ class EventDataSource extends CalendarDataSource {
         recurrenceRule += "COUNT=${event.eventInfo.times}";
       } else {
         String endDate = event.eventInfo.endDate as String;
-        int year = int.parse(endDate.substring(0, 4));
-        int month = int.parse(endDate.substring(5, 7));
-        int day = int.parse(endDate.substring(8, 10));
-        DateTime endDateTime = DateTime(year, month, day);
+        DateTime endDateTime = DateFormat("yyyy-MM-dd").parse(endDate);
         recurrenceRule += "UNTIL=${endDateTime.toIso8601String()}";
       }
       return recurrenceRule;
     }
+  }
+
+  @override
+  List<Appointment> getVisibleAppointments(
+      DateTime startDate, String calendarTimeZone,
+      [DateTime? endDate]) {
+    inspect(startDate);
+    return super.getVisibleAppointments(startDate, calendarTimeZone, endDate);
   }
 }

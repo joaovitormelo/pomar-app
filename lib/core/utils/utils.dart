@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 
 class Utils {
   static showSnackBar(context, message) {
@@ -24,5 +25,14 @@ class Utils {
     int month = int.parse(date.substring(5, 7));
     int day = int.parse(date.substring(8, 10));
     return DateTime(year, month, day);
+  }
+
+  static convertDateStrPattern(
+      String dateStr, String oldPattern, String newPattern) {
+    return DateFormat(newPattern).format(
+      DateFormat(oldPattern).parse(
+        dateStr.substring(0, 10),
+      ),
+    );
   }
 }

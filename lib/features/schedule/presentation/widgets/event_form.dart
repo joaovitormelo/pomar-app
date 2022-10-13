@@ -30,6 +30,8 @@ class EventFieldsControllers {
 
 class EventFieldsVariables {
   final bool allDay;
+  final bool endTimeIsEnabled;
+  final bool isRoutineIsEnabled;
   final bool isRoutine;
   final EndMode endMode;
   final String frequency;
@@ -40,6 +42,8 @@ class EventFieldsVariables {
 
   EventFieldsVariables({
     required this.allDay,
+    required this.endTimeIsEnabled,
+    required this.isRoutineIsEnabled,
     required this.isRoutine,
     required this.endMode,
     required this.frequency,
@@ -51,9 +55,11 @@ class EventFieldsVariables {
 }
 
 class EventFieldsSetters {
+  final setAllDay;
+  final setEndTimeIsEnabled;
+  final setIsRoutineIsEnabled;
   final setIsRoutine;
   final setEndMode;
-  final setAllDay;
   final setFrequency;
   final setIsTask;
   final setIsCollective;
@@ -61,9 +67,11 @@ class EventFieldsSetters {
   final setAssignedEmployees;
 
   EventFieldsSetters({
+    required this.setAllDay,
+    required this.setEndTimeIsEnabled,
+    required this.setIsRoutineIsEnabled,
     required this.setIsRoutine,
     required this.setEndMode,
-    required this.setAllDay,
     required this.setFrequency,
     required this.setIsTask,
     required this.setIsCollective,
@@ -123,12 +131,16 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
         ),
         variables: DateTimeFieldsVariables(
           allDay: variables.allDay,
+          endTimeIsEnabled: variables.endTimeIsEnabled,
+          isRoutineIsEnabled: variables.isRoutineIsEnabled,
           isRoutine: variables.isRoutine,
           frequency: variables.frequency,
           endMode: variables.endMode,
         ),
         setters: DateTimeFieldsSetters(
           setAllDay: setters.setAllDay,
+          setEndTimeIsEnabled: setters.setEndTimeIsEnabled,
+          setIsRoutineIsEnabled: setters.setIsRoutineIsEnabled,
           setIsRoutine: setters.setIsRoutine,
           setFrequency: setters.setFrequency,
           setEndMode: setters.setEndMode,
@@ -146,7 +158,7 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
         ),
         setters: TaskFieldsSetters(
           setIsTask: setters.setIsTask,
-          setIsCollective: setters.setIsTask,
+          setIsCollective: setters.setIsCollective,
           setEmployeeList: setters.setEmployeeList,
           setAssignedEmployees: setters.setAssignedEmployees,
         ),

@@ -124,6 +124,7 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
           "É tarefa?",
           style: TextStyle(fontSize: 15),
         ),
+        initialValue: variables.isTask,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(
@@ -146,6 +147,7 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
             "É coletiva?",
             style: TextStyle(fontSize: 15),
           ),
+          initialValue: variables.isCollective,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(
@@ -166,12 +168,12 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
               controller: assignmentController,
               readOnly: true,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (description) => validateString(
-                description,
-                0,
-                500,
-                emptyText: "Adicione ao menos um funcionário",
-              ),
+              validator: (_) {
+                if (variables.assignedEmployees.isEmpty) {
+                  return "Adicione ao menos um funcionário";
+                }
+                return null;
+              },
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: "Atribuições",

@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:pomar_app/core/config/server_routes.dart';
 import 'package:pomar_app/core/errors/errors.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_add_event.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_edit_event.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 
 class ScheduleServerSource {
@@ -58,6 +57,31 @@ class ScheduleServerSource {
     try {
       response = await dio
           .request(ServerRoutes.addEvent.path, options: options, data: {
+        "event": params.event.toJSON(),
+        "assignment_list": params.assignmentList
+            .map((assignment) => assignment.toJSON())
+            .toList(),
+      });
+    } catch (e) {
+      print(e);
+      throw ConnectionError();
+    }
+    if (response.statusCode != 200) {
+      throw mapServerResponseToError(response.statusCode, response.data);
+    }
+  }
+
+  editEvent(String token, EditEventParams params) async {
+    Options options = Options(
+      method: ServerRoutes.editEvent.method,
+      headers: {
+        "Authorization": token,
+      },
+    );
+    Response response;
+    try {
+      response = await dio
+          .request(ServerRoutes.editEvent.path, options: options, data: {
         "event": params.event.toJSON(),
         "assignment_list": params.assignmentList
             .map((assignment) => assignment.toJSON())

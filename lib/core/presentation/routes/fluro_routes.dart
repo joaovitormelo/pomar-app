@@ -14,6 +14,7 @@ class FluroRoutes {
   static String editEmployeeRoute = "editEmployee";
   static String scheduleAdminRoute = "scheduleAdmin";
   static String addEventRoute = "addEvent";
+  static String editEventRoute = "editEvent";
 
   static void setupRouter() {
     router.notFoundHandler =
@@ -35,5 +36,6 @@ class FluroRoutes {
     router.define(scheduleAdminRoute,
         handler: FluroHandlers.scheduleAdminHandler);
     router.define(addEventRoute, handler: FluroHandlers.addEventHandler);
+    router.define(editEventRoute, handler: FluroHandlers.editEventHandler);
   }
 }

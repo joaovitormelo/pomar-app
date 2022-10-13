@@ -2,53 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/config/globals.dart';
-import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_info_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
-import 'package:pomar_app/features/schedule/domain/usecases/do_add_event.dart';
-import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_bloc.dart';
-import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_events.dart';
-import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_states.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_edit_event.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/edit_event/edit_event_bloc.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/edit_event/edit_event_events.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/edit_event/edit_event_states.dart';
+import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_form.dart';
 
-enum EndMode {
-  endDate,
-  times,
-}
-
-class AddEventPage extends StatelessWidget {
+class EditEventPage extends StatelessWidget {
   final List<Employee> employeeList;
-
-  const AddEventPage({
-    Key? key,
-    required this.employeeList,
-  }) : super(key: key);
+  final EventData eventD;
+  const EditEventPage(
+      {Key? key, required this.employeeList, required this.eventD})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AddEventBloc>(
-      create: (context) => Globals.sl<AddEventBloc>(),
-      child: AddEventBody(
+    return BlocProvider<EditEventBloc>(
+      create: (context) => Globals.sl<EditEventBloc>(),
+      child: EditEventBody(
         employeeList: employeeList,
+        eventD: eventD,
       ),
     );
   }
 }
 
-class AddEventBody extends StatefulWidget {
+class EditEventBody extends StatefulWidget {
   final List<Employee> employeeList;
-  const AddEventBody({Key? key, required this.employeeList}) : super(key: key);
+  final EventData eventD;
+  const EditEventBody(
+      {Key? key, required this.employeeList, required this.eventD})
+      : super(key: key);
 
   @override
-  State<AddEventBody> createState() => _AddEventBodyState();
+  State<EditEventBody> createState() => _EditEventBodyState();
 }
 
-class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
+class _EditEventBodyState extends State<EditEventBody> {
   final _formKey = GlobalKey<FormBuilderState>();
-  final EventFieldsControllers controllers = EventFieldsControllers(
+  final EventFieldsControllers _controllers = EventFieldsControllers(
     title: TextEditingController(),
     initTime: TextEditingController(),
     endTime: TextEditingController(),
@@ -73,7 +72,54 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   @override
   void initState() {
     super.initState();
+
     employeeList = widget.employeeList;
+    EventModel event = widget.eventD.event;
+    List<AssignmentModel> assignmentList = widget.eventD.assignments;
+
+    _controllers.title.text = event.eventInfo.title;
+
+    allDay = event.eventInfo.allDay;
+    if (event.eventInfo.initTime != null) {
+      _controllers.initTime.text = event.eventInfo.initTime as String;
+      endTimeIsEnabled = true;
+    }
+    if (event.eventInfo.endTime != null) {
+      _controllers.endTime.text = event.eventInfo.endTime as String;
+    }
+    _controllers.date.text =
+        Utils.convertDateStrPattern(event.date, "yyyy-MM-dd", "dd/MM/yyyy");
+    isRoutineIsEnabled = true;
+    isRoutine = event.eventInfo.isRoutine;
+    if (event.eventInfo.frequency != null) {
+      frequency = event.eventInfo.frequency as String;
+    }
+    _controllers.interval.text = event.eventInfo.interval.toString();
+    if (event.eventInfo.endDate != null) {
+      endMode = EndMode.endDate;
+      _controllers.endDate.text = Utils.convertDateStrPattern(
+          event.eventInfo.endDate as String, "yyyy-MM-dd", "dd/MM/yyyy");
+    } else if (event.eventInfo.isRoutine) {
+      endMode = EndMode.times;
+      _controllers.times.text = event.eventInfo.times.toString();
+    }
+
+    isTask = event.eventInfo.isTask;
+    if (event.eventInfo.isCollective != null) {
+      isCollective = event.eventInfo.isCollective as bool;
+    }
+    employeeList = employeeList.where((employee) {
+      bool isAssigned = false;
+      assignmentList.map((assignment) {
+        if (assignment.idEmployee == employee.idEmployee) {
+          isAssigned = true;
+          assignedEmployees.add(employee);
+        }
+      }).toList();
+      return !isAssigned;
+    }).toList();
+
+    _controllers.description.text = event.eventInfo.description;
   }
 
   setAllDay(value) {
@@ -136,20 +182,20 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
     });
   }
 
-  onSubmit() {
+  _onSubmit() {
     if (_formKey.currentState!.validate()) {
-      String title = controllers.title.text;
-      String? initTime = controllers.initTime.text;
-      String? endTime = controllers.endTime.text;
+      String title = _controllers.title.text;
+      String? initTime = _controllers.initTime.text;
+      String? endTime = _controllers.endTime.text;
       String date = DateFormat("yyyy-MM-dd").format(
         DateFormat("dd/MM/yyyy").parse(
-          controllers.date.text,
+          _controllers.date.text,
         ),
       );
-      String intervalStr = controllers.interval.text;
-      String endDateStr = controllers.endDate.text;
-      String timesStr = controllers.times.text;
-      String description = controllers.description.text;
+      String intervalStr = _controllers.interval.text;
+      String endDateStr = _controllers.endDate.text;
+      String timesStr = _controllers.times.text;
+      String description = _controllers.description.text;
 
       int? interval;
       int? times;
@@ -176,10 +222,11 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
         }
       }
 
+      EventModel oldEvent = widget.eventD.event;
       EventModel event = EventModel(
-        idEvent: 0,
+        idEvent: oldEvent.idEvent,
         eventInfo: EventInfoModel(
-          idEventInfo: 0,
+          idEventInfo: oldEvent.eventInfo.idEventInfo,
           title: title,
           initTime: initTime,
           endTime: endTime,
@@ -204,7 +251,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
             .map(
               (employee) => AssignmentModel(
                 idAssignment: 0,
-                idEvent: 0,
+                idEvent: oldEvent.idEvent,
                 idEmployee: employee.idEmployee,
                 isCompleted: false,
               ),
@@ -212,9 +259,9 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
             .toList();
       }
 
-      BlocProvider.of<AddEventBloc>(context).add(
-        AddEventButtonPressed(
-          addEventParams: AddEventParams(
+      BlocProvider.of<EditEventBloc>(context).add(
+        EditEventButtonPressed(
+          params: EditEventParams(
             event: event,
             assignmentList: assignmentList,
           ),
@@ -227,20 +274,20 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Adicionar Evento"),
+        title: const Text("Editar Evento"),
         actions: [
           IconButton(
-            onPressed: onSubmit,
-            icon: const Icon(Icons.add),
+            onPressed: _onSubmit,
+            icon: const Icon(Icons.check),
           )
         ],
       ),
-      body: BlocListener<AddEventBloc, AddEventStates>(
+      body: BlocListener<EditEventBloc, EditEventState>(
         listener: (_, state) {
-          if (state is AddEventError) {
+          if (state is EditEventError) {
             Navigator.of(context).pop();
             Utils.showSnackBar(context, state.msg);
-          } else if (state is AddEventLoading) {
+          } else if (state is EditEventLoading) {
             showDialog(
               context: context,
               builder: (context) {
@@ -260,44 +307,42 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
             );
           } else {
             Navigator.of(context).pop();
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(true);
           }
         },
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                EventForm(
-                  formKey: _formKey,
-                  controllers: controllers,
-                  variables: EventFieldsVariables(
-                    allDay: allDay,
-                    endTimeIsEnabled: endTimeIsEnabled,
-                    isRoutineIsEnabled: isRoutineIsEnabled,
-                    isRoutine: isRoutine,
-                    endMode: endMode,
-                    frequency: frequency,
-                    isTask: isTask,
-                    isCollective: isCollective,
-                    employeeList: employeeList,
-                    assignedEmployees: assignedEmployees,
-                  ),
-                  setters: EventFieldsSetters(
-                    setAllDay: setAllDay,
-                    setEndTimeIsEnabled: setEndTimeIsEnabled,
-                    setIsRoutineIsEnabled: setIsRoutineIsEnabled,
-                    setIsRoutine: setIsRoutine,
-                    setEndMode: setEndMode,
-                    setFrequency: setFrequency,
-                    setIsTask: setIsTask,
-                    setIsCollective: setIsCollective,
-                    setEmployeeList: setEmployeeList,
-                    setAssignedEmployees: setAssignedEmployees,
-                  ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              EventForm(
+                formKey: _formKey,
+                controllers: _controllers,
+                variables: EventFieldsVariables(
+                  allDay: allDay,
+                  endTimeIsEnabled: endTimeIsEnabled,
+                  isRoutineIsEnabled: isRoutineIsEnabled,
+                  isRoutine: isRoutine,
+                  endMode: endMode,
+                  frequency: frequency,
+                  isTask: isTask,
+                  isCollective: isCollective,
+                  employeeList: employeeList,
+                  assignedEmployees: assignedEmployees,
                 ),
-              ],
-            ),
+                setters: EventFieldsSetters(
+                  setAllDay: setAllDay,
+                  setEndTimeIsEnabled: setEndTimeIsEnabled,
+                  setIsRoutineIsEnabled: setIsRoutineIsEnabled,
+                  setIsRoutine: setIsRoutine,
+                  setEndMode: setEndMode,
+                  setFrequency: setFrequency,
+                  setIsTask: setIsTask,
+                  setIsCollective: setIsCollective,
+                  setEmployeeList: setEmployeeList,
+                  setAssignedEmployees: setAssignedEmployees,
+                ),
+              ),
+            ],
           ),
         ),
       ),

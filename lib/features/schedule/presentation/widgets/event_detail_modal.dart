@@ -15,9 +15,13 @@ const double spacementRows = 30;
 class EventDetailModal extends StatelessWidget {
   final EventData eventD;
   final List<Employee> employeeList;
+  final onEditButtonPressed;
 
   const EventDetailModal(
-      {Key? key, required this.eventD, required this.employeeList})
+      {Key? key,
+      required this.eventD,
+      required this.employeeList,
+      required this.onEditButtonPressed})
       : super(key: key);
 
   _getTimeColumnChildren(EventModel event) {
@@ -265,8 +269,20 @@ class EventDetailModal extends StatelessWidget {
     List<Widget> columnChildren = [
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: const [
-          Text("Editar | Excluir"),
+        children: [
+          TextButton(
+            onPressed: () {
+              onEditButtonPressed(eventD);
+            },
+            child: const Text("Editar"),
+          ),
+          TextButton(
+            onPressed: () {},
+            child: const Text(
+              "Excluir",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
         ],
       ),
       const SizedBox(

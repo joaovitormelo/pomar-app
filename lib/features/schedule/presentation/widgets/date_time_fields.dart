@@ -8,12 +8,16 @@ import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.da
 
 class DateTimeFieldsVariables {
   final bool allDay;
+  final bool endTimeIsEnabled;
+  final bool isRoutineIsEnabled;
   final bool isRoutine;
   final String frequency;
   final EndMode endMode;
 
   DateTimeFieldsVariables({
     required this.allDay,
+    required this.endTimeIsEnabled,
+    required this.isRoutineIsEnabled,
     required this.isRoutine,
     required this.frequency,
     required this.endMode,
@@ -22,12 +26,16 @@ class DateTimeFieldsVariables {
 
 class DateTimeFieldsSetters {
   final setAllDay;
+  final setEndTimeIsEnabled;
+  final setIsRoutineIsEnabled;
   final setIsRoutine;
   final setFrequency;
   final setEndMode;
 
   DateTimeFieldsSetters({
     required this.setAllDay,
+    required this.setEndTimeIsEnabled,
+    required this.setIsRoutineIsEnabled,
     required this.setIsRoutine,
     required this.setFrequency,
     required this.setEndMode,
@@ -70,9 +78,6 @@ class DateTimeFields extends StatefulWidget {
 
 class _DateTimeFieldsState extends State<DateTimeFields>
     with InputValidationMixin {
-  bool endTimeIsEnabled = false;
-  bool isRoutineIsEnabled = false;
-
   onInitTimePickerTapped() async {
     TimeOfDay? pickedTime = await showTimePicker(
       initialTime: TimeOfDay.now(),
@@ -94,7 +99,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
         widget.controllers.initTime.text =
             pickedTime!.format(context).toString();
         widget.controllers.endTime.text = endTime.format(context).toString();
-        endTimeIsEnabled = true;
+        widget.setters.setEndTimeIsEnabled(true);
       });
     }
   }
@@ -147,9 +152,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
     if (pickedDate is DateTime) {
       widget.controllers.date.text =
           DateFormat("dd/MM/yyyy").format(pickedDate);
-      setState(() {
-        isRoutineIsEnabled = true;
-      });
+      widget.setters.setIsRoutineIsEnabled(true);
     }
   }
 
@@ -206,6 +209,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
           "Dia todo?",
           style: TextStyle(fontSize: 15),
         ),
+        initialValue: widget.variables.allDay,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(
@@ -258,7 +262,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
                 validator: (description) => validateString(description, 0, 500),
                 readOnly: true,
                 onTap: onEndTimePickerTapped,
-                enabled: endTimeIsEnabled,
+                enabled: widget.variables.endTimeIsEnabled,
               ),
             ),
           ],
@@ -291,7 +295,8 @@ class _DateTimeFieldsState extends State<DateTimeFields>
           "Repetir?",
           style: TextStyle(fontSize: 15),
         ),
-        enabled: isRoutineIsEnabled,
+        initialValue: widget.variables.isRoutine,
+        enabled: widget.variables.isRoutineIsEnabled,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(
@@ -318,6 +323,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
               Expanded(
                 child: FormBuilderDropdown(
                   name: "frequency",
+                  initialValue: widget.variables.frequency,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.repeat),
@@ -385,6 +391,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
               ),
             ),
             child: DefaultTabController(
+              initialIndex: widget.variables.endMode == EndMode.endDate ? 0 : 1,
               length: 2,
               child: Column(
                 children: [

@@ -10,6 +10,7 @@ import 'package:pomar_app/features/employee/presentation/pages/employees_page.da
 import 'package:pomar_app/features/home/presentation/pages/home_admin_page.dart';
 import 'package:pomar_app/features/home/presentation/pages/home_employee_page.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
+import 'package:pomar_app/features/schedule/presentation/pages/edit_event_page.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/schedule_admin_page.dart';
 
 class FluroHandlers {
@@ -43,6 +44,16 @@ class FluroHandlers {
       final dynamic args =
           ModalRoute.of(context as BuildContext)?.settings.arguments;
       return AddEventPage(employeeList: args);
+    },
+  );
+  static Handler editEventHandler = Handler(
+    handlerFunc: (context, params) {
+      final dynamic args =
+          ModalRoute.of(context as BuildContext)?.settings.arguments;
+      return EditEventPage(
+        employeeList: args[0],
+        eventD: args[1],
+      );
     },
   );
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
@@ -6,8 +8,10 @@ import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/utils.dart';
+import 'package:pomar_app/features/employee/data/models/employee_model.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
+import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/bloc.dart';
 import 'package:pomar_app/features/schedule/presentation/helpers/event_data_source.dart';
@@ -47,6 +51,7 @@ class ScheduleAdminBody extends StatefulWidget {
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
   var _calendarView = CalendarView.month;
   final _calendarController = CalendarController();
+  List<Employee> employeeList = [];
 
   @override
   void initState() {
@@ -88,7 +93,26 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
       builder: (context) => EventDetailModal(
         eventD: eventD,
         employeeList: employeeList,
+        onEditButtonPressed: _onEditButtonPressed,
       ),
+    );
+  }
+
+  _onEditButtonPressed(EventData eventD) {
+    Navigator.pushNamed(
+      context,
+      FluroRoutes.editEventRoute,
+      arguments: [
+        employeeList,
+        eventD,
+      ],
+    ).then(
+      (wasEdited) {
+        BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
+        if (wasEdited != null) {
+          Navigator.pop(context);
+        }
+      },
     );
   }
 
@@ -151,7 +175,6 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
           } else {
             List<EventData> eventDataList =
                 (readEventsState as ReadEventsHasData).eventList;
-            List<Employee> employeeList = [];
             if (employeesState is EmployeesHasData) {
               employeeList = employeesState.employees;
             }

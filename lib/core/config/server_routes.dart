@@ -26,4 +26,6 @@ class ServerRoutes {
       ServerRouteInfo(path: "events", method: "get");
   static ServerRouteInfo addEvent =
       ServerRouteInfo(path: "event", method: "post");
+  static ServerRouteInfo editEvent =
+      ServerRouteInfo(path: "event", method: "put");
 }
