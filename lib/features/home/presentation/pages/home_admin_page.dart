@@ -4,6 +4,8 @@ import 'package:pomar_app/core/presentation/templates/authorized_template.dart';
 
 const String textManageEmployeesButton = "Gerencie os funcionários";
 const String textScheduleButton = "Acessar a agenda";
+const String textWhatsAppConnectButton = "Conectar ao WhatsApp";
+const String textWhatsAppMessageButton = "Mensagem WhatsApp";
 
 class HomeAdmin extends StatefulWidget {
   const HomeAdmin({Key? key}) : super(key: key);
@@ -21,6 +23,14 @@ class _HomeAdminState extends State<HomeAdmin> {
     Navigator.pushNamed(context, FluroRoutes.scheduleAdminRoute);
   }
 
+  onWhatsAppConnectButtonPressed() {
+    Navigator.pushNamed(context, FluroRoutes.whatsAppConnectRoute);
+  }
+
+  onWhatsAppMessageButtonPressed() {
+    Navigator.pushNamed(context, FluroRoutes.whatsAppMessageRoute);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AuthorizedTemplate(
@@ -34,6 +44,14 @@ class _HomeAdminState extends State<HomeAdmin> {
             ElevatedButton(
               onPressed: onScheduleButtonPressed,
               child: const Text(textScheduleButton),
+            ),
+            ElevatedButton(
+              onPressed: onWhatsAppConnectButtonPressed,
+              child: const Text(textWhatsAppConnectButton),
+            ),
+            ElevatedButton(
+              onPressed: onWhatsAppMessageButtonPressed,
+              child: const Text(textWhatsAppMessageButton),
             ),
           ],
         ),

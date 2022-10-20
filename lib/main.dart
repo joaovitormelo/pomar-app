@@ -5,6 +5,7 @@ import 'package:pomar_app/core/initializer.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/features/auth/presentation/bloc/bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:pomar_app/features/whatsapp/connection/presentation/bloc/whatsapp_connection_bloc.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 void main() async {
@@ -15,6 +16,7 @@ void main() async {
       BlocProvider(create: (_) => Globals.sl<AuthBloc>()),
       BlocProvider(create: (_) => Globals.sl<LoginBloc>()),
       BlocProvider(create: (_) => Globals.sl<LogoutBloc>()),
+      BlocProvider(create: (_) => Globals.sl<WhatsAppConnectionBloc>()),
     ],
     child: const MyApp(),
   ));

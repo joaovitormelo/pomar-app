@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
+import 'package:pomar_app/core/presentation/widgets/custom_box.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 
 class TaskFieldsVariables {
@@ -221,27 +222,7 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
                 );
               },
             ),
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.grey,
-                    width: 1,
-                    style: BorderStyle.solid,
-                  ),
-                  left: BorderSide(
-                    color: Colors.grey,
-                    width: 1,
-                    style: BorderStyle.solid,
-                  ),
-                  right: BorderSide(
-                    color: Colors.grey,
-                    width: 1,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-              ),
-              height: 150,
+            CustomBox(
               child: Builder(builder: (context) {
                 if (variables.assignedEmployees.isNotEmpty) {
                   return ListView.builder(

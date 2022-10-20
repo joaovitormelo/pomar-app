@@ -15,6 +15,8 @@ class FluroRoutes {
   static String scheduleAdminRoute = "scheduleAdmin";
   static String addEventRoute = "addEvent";
   static String editEventRoute = "editEvent";
+  static String whatsAppConnectRoute = "whatsAppConnect";
+  static String whatsAppMessageRoute = "whatsAppMessage";
 
   static void setupRouter() {
     router.notFoundHandler =
@@ -37,5 +39,10 @@ class FluroRoutes {
         handler: FluroHandlers.scheduleAdminHandler);
     router.define(addEventRoute, handler: FluroHandlers.addEventHandler);
     router.define(editEventRoute, handler: FluroHandlers.editEventHandler);
+    //WHATSAPP
+    router.define(whatsAppConnectRoute,
+        handler: FluroHandlers.whatsAppConnectHandler);
+    router.define(whatsAppMessageRoute,
+        handler: FluroHandlers.whatsAppMessageHandler);
   }
 }

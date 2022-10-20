@@ -12,6 +12,8 @@ import 'package:pomar_app/features/home/presentation/pages/home_employee_page.da
 import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/edit_event_page.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/schedule_admin_page.dart';
+import 'package:pomar_app/features/whatsapp/connection/presentation/pages/whatsapp_connect_page.dart';
+import 'package:pomar_app/features/whatsapp/message/presentation/pages/whatsapp_message_page.dart';
 
 class FluroHandlers {
   //AUTH
@@ -56,4 +58,9 @@ class FluroHandlers {
       );
     },
   );
+  //WHATSAPP
+  static Handler whatsAppConnectHandler =
+      Handler(handlerFunc: (context, params) => const WhatsAppConnectPage());
+  static Handler whatsAppMessageHandler =
+      Handler(handlerFunc: (context, params) => const WhatsAppMessagePage());
 }

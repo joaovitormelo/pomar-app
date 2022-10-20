@@ -1,13 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pomar_app/core/config/globals.dart';
-import 'package:pomar_app/features/employee/data/datasources/employee_server_source.dart';
-import 'package:pomar_app/features/employee/data/repositories/employee_repository.dart';
-import 'package:pomar_app/features/employee/domain/usecases/do_create_employee.dart';
-import 'package:pomar_app/features/employee/domain/usecases/do_delete_employee.dart';
-import 'package:pomar_app/features/employee/domain/usecases/do_read_employees.dart';
-import 'package:pomar_app/features/employee/domain/usecases/do_update_employee.dart';
-import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
 import 'package:pomar_app/features/schedule/data/datasources/schedule_server_source.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_add_event.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_edit_event.dart';
