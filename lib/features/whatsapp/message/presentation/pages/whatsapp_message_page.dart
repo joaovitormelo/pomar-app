@@ -8,6 +8,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
+import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/whatsapp/message/presentation/bloc/contact_bloc/contact_bloc.dart';
 import 'package:pomar_app/features/whatsapp/message/presentation/bloc/contact_bloc/contact_events.dart';
 import 'package:pomar_app/features/whatsapp/message/presentation/bloc/contact_bloc/contact_states.dart';
@@ -119,7 +120,14 @@ class _WhatsAppMessageBodyState extends State<WhatsAppMessageBody>
                 ),
                 height: MediaQuery.of(context).size.height / 3,
                 child: Center(
-                  child: BlocBuilder<ContactBloc, ContactState>(
+                  child: BlocConsumer<ContactBloc, ContactState>(
+                    listenWhen: (_, current) => current is ContactError,
+                    listener: (context, state) {
+                      Utils.showSnackBar(
+                        context,
+                        "Erro ao importar contatos",
+                      );
+                    },
                     builder: (context, state) {
                       if (state is ContactHasData) {
                         return ListView.builder(

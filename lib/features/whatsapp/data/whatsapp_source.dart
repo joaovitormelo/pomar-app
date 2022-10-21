@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:pomar_app/core/config/server_routes.dart';
 import 'package:pomar_app/core/errors/errors.dart';
 import 'package:pomar_app/features/whatsapp/connection/usecases/do_check_connection.dart';
+import 'package:pomar_app/features/whatsapp/message/usecases/do_send_messages.dart';
 
 class WhatsAppServerSource {
   final Dio dio;
@@ -67,4 +68,6 @@ class WhatsAppServerSource {
       throw mapServerResponseToError(response.statusCode, response.data);
     }
   }
+
+  sendMessages(String jwtToken, SendMessagesParams params) async {}
 }

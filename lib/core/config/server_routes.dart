@@ -34,4 +34,6 @@ class ServerRoutes {
       ServerRouteInfo(path: "whatsapp/check_connection", method: "get");
   static ServerRouteInfo disconnectWhats =
       ServerRouteInfo(path: "whatsapp/disconnect", method: "get");
+  static ServerRouteInfo sendMessages =
+      ServerRouteInfo(path: "whatsapp/send", method: "post");
 }

@@ -25,7 +25,7 @@ class WhatsAppInitializer {
         doDisconnect: sl(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerFactory(
       () => ContactBloc(
         doReadContactList: sl(),
       ),
