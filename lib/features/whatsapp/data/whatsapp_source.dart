@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:pomar_app/core/config/server_routes.dart';
 import 'package:pomar_app/core/errors/errors.dart';
 import 'package:pomar_app/features/whatsapp/connection/usecases/do_check_connection.dart';
+import 'package:pomar_app/features/whatsapp/message/data/models/contact_model.dart';
+import 'package:pomar_app/features/whatsapp/message/presentation/bloc/contact_bloc/contact_bloc.dart';
 import 'package:pomar_app/features/whatsapp/message/usecases/do_send_messages.dart';
 
 class WhatsAppServerSource {
@@ -69,5 +71,37 @@ class WhatsAppServerSource {
     }
   }
 
-  sendMessages(String jwtToken, SendMessagesParams params) async {}
+  sendMessages(String jwtToken, SendMessagesParams params) async {
+    Options options = Options(
+      method: ServerRoutes.sendMessages.method,
+      headers: {"Authorization": jwtToken},
+    );
+    inspect(params);
+    var data = {
+      "contact_list": params.contactList.map((e) => e.toJson()).toList(),
+      "message": params.msg,
+    };
+    Response response;
+    try {
+      response = await dio.request(
+        ServerRoutes.sendMessages.path,
+        data: data,
+        options: options,
+      );
+    } catch (e) {
+      print(e);
+      throw ConnectionError();
+    }
+    if (response.statusCode == 200) {
+      inspect(response.data);
+      List<ContactModel> contactList = (response.data as List)
+          .map<ContactModel>(
+            (contact) => ContactModel.fromJson(contact),
+          )
+          .toList();
+      return contactList;
+    } else {
+      throw mapServerResponseToError(response.statusCode, response.data);
+    }
+  }
 }

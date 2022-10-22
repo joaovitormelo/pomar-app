@@ -9,9 +9,11 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
   DoReadContactList doReadContactList;
   ContactBloc({required this.doReadContactList}) : super(ContactNoData()) {
     on<ImportContactsButtonPressed>(onImportContactsButtonPressed);
+    on<UpdateContactsAfterSent>(onUpdateContactsAfterSent);
   }
 
   onImportContactsButtonPressed(ImportContactsButtonPressed event, emit) async {
+    emit(ContactNoData());
     try {
       List<ContactModel> contactList = await doReadContactList(event.params);
       if (contactList.isEmpty) {
@@ -22,5 +24,10 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
     } catch (e) {
       emit(ContactError(msg: mapErrorToMsg(e)));
     }
+  }
+
+  onUpdateContactsAfterSent(UpdateContactsAfterSent event, emit) async {
+    emit(ContactNoData());
+    emit(ContactHasData(contactList: event.contactList));
   }
 }

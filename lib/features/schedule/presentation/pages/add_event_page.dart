@@ -68,7 +68,6 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   bool isCollective = false;
   List<Employee> employeeList = [];
   List<Employee> assignedEmployees = [];
-  late BuildContext loadingModalContext;
 
   @override
   void initState() {
@@ -241,23 +240,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
             Navigator.of(context).pop();
             Utils.showSnackBar(context, state.msg);
           } else if (state is AddEventLoading) {
-            showDialog(
-              context: context,
-              builder: (context) {
-                loadingModalContext = context;
-                return Center(
-                  child: Container(
-                    color: Colors.grey,
-                    width: 60,
-                    height: 60,
-                    padding: const EdgeInsets.all(5),
-                    child: const CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
-            );
+            Utils.showLoadingEntirePage(context);
           } else {
             Navigator.of(context).pop();
             Navigator.of(context).pop();

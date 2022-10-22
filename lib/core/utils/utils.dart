@@ -11,6 +11,26 @@ class Utils {
     ));
   }
 
+  static showLoadingEntirePage(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Center(
+          child: Container(
+            color: Colors.grey,
+            width: 60,
+            height: 60,
+            padding: const EdgeInsets.all(5),
+            child: const CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   static strToDateTime(String dateTime) {
     int year = int.parse(dateTime.substring(0, 4));
     int month = int.parse(dateTime.substring(5, 7));

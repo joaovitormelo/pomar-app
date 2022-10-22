@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:pomar_app/features/whatsapp/message/data/models/contact_model.dart';
@@ -20,7 +21,7 @@ class ExcelReader implements ExcelReaderContract {
         ContactModel(
           idContact: i,
           name: row[params.nameColumn - 1]!.value,
-          number: row[params.phoneColumn - 1]!.value.toString(),
+          phone: row[params.phoneColumn - 1]!.value.toString(),
           status: SentStatus.unsent,
         ),
       );
