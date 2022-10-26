@@ -9,13 +9,12 @@ import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/utils.dart';
-import 'package:pomar_app/features/employee/data/models/employee_model.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
-import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/bloc.dart';
 import 'package:pomar_app/features/schedule/presentation/helpers/event_data_source.dart';
+import 'package:pomar_app/features/schedule/presentation/widgets/custom_calendar.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_detail_modal.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_display.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -51,9 +50,6 @@ class ScheduleAdminBody extends StatefulWidget {
 }
 
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
-  var _selectedDay;
-  var _focusedDay = DateTime.now();
-  var _calendarFormat = CalendarFormat.month;
   var _calendarView = CalendarView.month;
   final _calendarController = CalendarController();
   List<Employee> employeeList = [];
@@ -63,31 +59,6 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     super.initState();
     BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
     BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
-  }
-
-  _getEventDataSource(List<EventData> source) {
-    return EventDataSource(source);
-  }
-
-  _buildAppointment(
-      details, List<EventData> eventDataList, List<Employee> employeeList) {
-    late EventData eventD;
-    if (details.appointments.first is EventData) {
-      eventD = details.appointments.first as EventData;
-    } else {
-      final appointment = details.appointments.first as Appointment;
-      eventDataList.map((EventData e) {
-        if (e.event.idEvent == appointment.id) {
-          eventD = e;
-        }
-      }).toList();
-    }
-    return EventDisplay(
-      eventD: eventD,
-      onEventPressed: () {
-        _onEventPressed(eventD, employeeList);
-      },
-    );
   }
 
   _onEventPressed(EventData eventD, List<Employee> employeeList) {
@@ -145,142 +116,6 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     ];
   }
 
-  _determineIfDailyRoutineEventExistsInDay(EventModel event, DateTime day) {
-    DateTime date = Utils.strToDate(event.date);
-    var diff = day.difference(date);
-    var divisionRest = diff.inDays % (event.eventInfo.interval as int);
-    if (divisionRest == 0) {
-      if (event.eventInfo.endDate != null) {
-        if (date.compareTo(
-                Utils.strToDate(event.eventInfo.endDate as String)) <=
-            0) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        var divisionQuocient =
-            diff.inDays / (event.eventInfo.interval as int) as int;
-        if (divisionQuocient <= (event.eventInfo.times as int)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  }
-
-  _determineIfWeeklyRoutineEventExistsInDay(EventModel event, DateTime day) {
-    DateTime date = Utils.strToDate(event.date);
-    var diff = day.difference(date);
-    var divisionRest = diff.inDays % 7 * (event.eventInfo.interval as int);
-    if (divisionRest == 0) {
-      if (event.eventInfo.endDate != null) {
-        if (date.compareTo(
-                Utils.strToDate(event.eventInfo.endDate as String)) <=
-            0) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        var divisionQuocient =
-            diff.inDays / 7 * (event.eventInfo.interval as int) as int;
-        if (divisionQuocient <= (event.eventInfo.times as int)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  }
-
-  _determineIfMonthlyRoutineEventExistsInDay(EventModel event, DateTime day) {
-    DateTime date = Utils.strToDate(event.date);
-    var monthDiff = day.month - date.month;
-    var divisionRest = monthDiff % (event.eventInfo.interval as int);
-    if (date.day == day.day && divisionRest == 0) {
-      if (event.eventInfo.endDate != null) {
-        if (date.compareTo(
-                Utils.strToDate(event.eventInfo.endDate as String)) <=
-            0) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        var divisionQuocient =
-            monthDiff / (event.eventInfo.interval as int) as int;
-        if (divisionQuocient <= (event.eventInfo.times as int)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  }
-
-  _determineIfYearlyRoutineEventExistsInDay(EventModel event, DateTime day) {
-    DateTime date = Utils.strToDate(event.date);
-    var yearDiff = day.year - date.year;
-    var divisionRest = yearDiff % (event.eventInfo.interval as int);
-    if (date.day == day.day && date.month == day.month && divisionRest == 0) {
-      if (event.eventInfo.endDate != null) {
-        if (date.compareTo(
-                Utils.strToDate(event.eventInfo.endDate as String)) <=
-            0) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        var divisionQuocient =
-            yearDiff / (event.eventInfo.interval as int) as int;
-        if (divisionQuocient <= (event.eventInfo.times as int)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  }
-
-  _loadEventsPerDay(DateTime day, List<EventData> eventDataList) {
-    return eventDataList.where((eventData) {
-      var event = eventData.event;
-      DateTime date = Utils.strToDate(event.date);
-      if (event.eventInfo.isRoutine) {
-        var diff = day.difference(date);
-        if (diff.inSeconds < 0) {
-          return false;
-        } else {
-          if (event.eventInfo.frequency == "D") {
-            return _determineIfDailyRoutineEventExistsInDay(event, day);
-          } else if (event.eventInfo.frequency == "W") {
-            return _determineIfWeeklyRoutineEventExistsInDay(event, day);
-          } else if (event.eventInfo.frequency == "M") {
-            return _determineIfMonthlyRoutineEventExistsInDay(event, day);
-          } else {
-            return _determineIfYearlyRoutineEventExistsInDay(event, day);
-          }
-        }
-      } else {
-        if (isSameDay(date, day)) {
-          return true;
-        }
-        return false;
-      }
-    }).toList();
-  }
-
   _buildBody() {
     return MultiBlocListener(
       listeners: [
@@ -325,35 +160,10 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
             }
             return Column(
               children: [
-                /*SfCalendar(
-                  view: CalendarView.month,
-                  controller: _calendarController,
-                  showNavigationArrow: true,
-                  monthViewSettings: const MonthViewSettings(
-                    showAgenda: true,
-                  ),
-                  dataSource: _getEventDataSource(eventDataList),
-                  initialSelectedDate: DateTime.now(),
-                  appointmentBuilder: (context, details) =>
-                      _buildAppointment(details, eventDataList, employeeList),
-                ),*/
-                TableCalendar(
-                  focusedDay: _focusedDay,
-                  firstDay: DateTime(2022, 1, 1),
-                  lastDay: DateTime(2122, 1, 1),
-                  locale: 'pt_BR',
-                  selectedDayPredicate: (day) {
-                    return isSameDay(_selectedDay, day);
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  headerStyle: const HeaderStyle(formatButtonVisible: false),
-                  eventLoader: (DateTime day) =>
-                      _loadEventsPerDay(day, eventDataList),
+                CustomCalendarPage(
+                  eventDataList: eventDataList,
+                  employeeList: employeeList,
+                  onEventPressed: _onEventPressed,
                 ),
               ],
             );

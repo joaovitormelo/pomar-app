@@ -62,7 +62,8 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   bool endTimeIsEnabled = false;
   bool isRoutineIsEnabled = false;
   bool isRoutine = false;
-  String frequency = "";
+  String? frequency;
+  bool undefinedEnd = true;
   EndMode endMode = EndMode.endDate;
   bool isTask = false;
   bool isCollective = false;
@@ -96,6 +97,12 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   setIsRoutine(value) {
     setState(() {
       isRoutine = value;
+    });
+  }
+
+  setUndefinedEnd(value) {
+    setState(() {
+      undefinedEnd = value;
     });
   }
 
@@ -162,16 +169,21 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
       }
       if (isRoutine) {
         interval = int.parse(intervalStr);
-        if (endMode == EndMode.endDate) {
-          endDate = DateFormat("yyyy-MM-dd").format(
-            DateFormat("dd/MM/yyyy").parse(
-              endDateStr,
-            ),
-          );
+        if (undefinedEnd) {
           times = null;
-        } else {
-          times = int.parse(timesStr);
           endDate = null;
+        } else {
+          if (endMode == EndMode.endDate) {
+            endDate = DateFormat("yyyy-MM-dd").format(
+              DateFormat("dd/MM/yyyy").parse(
+                endDateStr,
+              ),
+            );
+            times = null;
+          } else {
+            times = int.parse(timesStr);
+            endDate = null;
+          }
         }
       }
 
@@ -191,6 +203,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
           frequency: frequency,
           interval: interval,
           weekDays: "",
+          undefinedEnd: undefinedEnd,
           endDate: endDate,
           times: times,
         ),
@@ -259,6 +272,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
                     endTimeIsEnabled: endTimeIsEnabled,
                     isRoutineIsEnabled: isRoutineIsEnabled,
                     isRoutine: isRoutine,
+                    undefinedEnd: undefinedEnd,
                     endMode: endMode,
                     frequency: frequency,
                     isTask: isTask,
@@ -271,6 +285,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
                     setEndTimeIsEnabled: setEndTimeIsEnabled,
                     setIsRoutineIsEnabled: setIsRoutineIsEnabled,
                     setIsRoutine: setIsRoutine,
+                    setUndefinedEnd: setUndefinedEnd,
                     setEndMode: setEndMode,
                     setFrequency: setFrequency,
                     setIsTask: setIsTask,

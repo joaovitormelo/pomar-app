@@ -33,8 +33,9 @@ class EventFieldsVariables {
   final bool endTimeIsEnabled;
   final bool isRoutineIsEnabled;
   final bool isRoutine;
+  final bool undefinedEnd;
   final EndMode endMode;
-  final String frequency;
+  final String? frequency;
   final bool isTask;
   final bool isCollective;
   final List<Employee> employeeList;
@@ -45,6 +46,7 @@ class EventFieldsVariables {
     required this.endTimeIsEnabled,
     required this.isRoutineIsEnabled,
     required this.isRoutine,
+    required this.undefinedEnd,
     required this.endMode,
     required this.frequency,
     required this.isTask,
@@ -59,6 +61,7 @@ class EventFieldsSetters {
   final setEndTimeIsEnabled;
   final setIsRoutineIsEnabled;
   final setIsRoutine;
+  final setUndefinedEnd;
   final setEndMode;
   final setFrequency;
   final setIsTask;
@@ -71,6 +74,7 @@ class EventFieldsSetters {
     required this.setEndTimeIsEnabled,
     required this.setIsRoutineIsEnabled,
     required this.setIsRoutine,
+    required this.setUndefinedEnd,
     required this.setEndMode,
     required this.setFrequency,
     required this.setIsTask,
@@ -135,6 +139,7 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
           isRoutineIsEnabled: variables.isRoutineIsEnabled,
           isRoutine: variables.isRoutine,
           frequency: variables.frequency,
+          undefinedEnd: variables.undefinedEnd,
           endMode: variables.endMode,
         ),
         setters: DateTimeFieldsSetters(
@@ -143,6 +148,7 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
           setIsRoutineIsEnabled: setters.setIsRoutineIsEnabled,
           setIsRoutine: setters.setIsRoutine,
           setFrequency: setters.setFrequency,
+          setUndefinedEnd: setters.setUndefinedEnd,
           setEndMode: setters.setEndMode,
         ),
       ),

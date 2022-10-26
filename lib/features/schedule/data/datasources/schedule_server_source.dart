@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:pomar_app/core/config/server_routes.dart';
 import 'package:pomar_app/core/errors/errors.dart';
@@ -30,6 +32,7 @@ class ScheduleServerSource {
       throw ConnectionError();
     }
     if (response.statusCode == 200) {
+      inspect(response.data);
       List<EventData> eventDataList =
           (response.data as List).map<EventData>((eventData) {
         List<AssignmentModel> assignments = eventData['assignments']
@@ -40,6 +43,7 @@ class ScheduleServerSource {
             event: EventModel.fromJSON(eventData['event']),
             assignments: assignments);
       }).toList();
+      inspect(eventDataList);
       return eventDataList;
     } else {
       throw mapServerResponseToError(response.statusCode, response.data);

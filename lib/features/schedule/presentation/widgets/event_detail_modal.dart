@@ -77,12 +77,14 @@ class EventDetailModal extends StatelessWidget {
           textDate += 'A cada ${event.eventInfo.interval} meses';
         }
       }
-      textDate += ', ';
-      if (event.eventInfo.endDate != null) {
-        textDate +=
-            'até ${DateFormat("dd/MM/yyyy").format(Utils.strToDate(event.eventInfo.endDate as String))}';
-      } else {
-        textDate += '${event.eventInfo.times} vezes';
+      if (!(event.eventInfo.undefinedEnd as bool)) {
+        textDate += ', ';
+        if (event.eventInfo.endDate != null) {
+          textDate +=
+              'até ${DateFormat("dd/MM/yyyy").format(Utils.strToDate(event.eventInfo.endDate as String))}';
+        } else {
+          textDate += '${event.eventInfo.times} vezes';
+        }
       }
     }
     timeColumnChildren.addAll([

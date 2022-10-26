@@ -11,7 +11,8 @@ class DateTimeFieldsVariables {
   final bool endTimeIsEnabled;
   final bool isRoutineIsEnabled;
   final bool isRoutine;
-  final String frequency;
+  final String? frequency;
+  final bool undefinedEnd;
   final EndMode endMode;
 
   DateTimeFieldsVariables({
@@ -20,6 +21,7 @@ class DateTimeFieldsVariables {
     required this.isRoutineIsEnabled,
     required this.isRoutine,
     required this.frequency,
+    required this.undefinedEnd,
     required this.endMode,
   });
 }
@@ -30,6 +32,7 @@ class DateTimeFieldsSetters {
   final setIsRoutineIsEnabled;
   final setIsRoutine;
   final setFrequency;
+  final setUndefinedEnd;
   final setEndMode;
 
   DateTimeFieldsSetters({
@@ -38,6 +41,7 @@ class DateTimeFieldsSetters {
     required this.setIsRoutineIsEnabled,
     required this.setIsRoutine,
     required this.setFrequency,
+    required this.setUndefinedEnd,
     required this.setEndMode,
   });
 }
@@ -179,6 +183,10 @@ class _DateTimeFieldsState extends State<DateTimeFields>
     widget.setters.setAllDay(value);
   }
 
+  onUndefinedEndChanged(value) {
+    widget.setters.setUndefinedEnd(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
@@ -269,6 +277,12 @@ class _DateTimeFieldsState extends State<DateTimeFields>
         ),
       ]);
     }
+
+    var dataLabel = "Data";
+    if (widget.variables.isRoutine) {
+      dataLabel = "Data inicial";
+    }
+
     children.addAll([
       const SizedBox(
         height: 30,
@@ -276,10 +290,10 @@ class _DateTimeFieldsState extends State<DateTimeFields>
       FormBuilderTextField(
         name: "date",
         controller: widget.controllers.date,
-        decoration: const InputDecoration(
-          prefixIcon: Icon(Icons.calendar_month),
-          border: OutlineInputBorder(),
-          labelText: "Data",
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.calendar_month),
+          border: const OutlineInputBorder(),
+          labelText: dataLabel,
         ),
         autovalidateMode: AutovalidateMode.onUserInteraction,
         validator: (description) => validateString(description, 0, 500),
@@ -377,8 +391,36 @@ class _DateTimeFieldsState extends State<DateTimeFields>
           const SizedBox(
             height: 30,
           ),
+          FormBuilderSwitch(
+            name: "undefined_end",
+            title: const Text(
+              "Final indefinido",
+              style: TextStyle(fontSize: 15),
+            ),
+            initialValue: widget.variables.undefinedEnd,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 15,
+                vertical: 10,
+              ),
+              prefixIcon: Icon(
+                FontAwesomeIcons.infinity,
+                size: 20,
+              ),
+            ),
+            onChanged: onUndefinedEndChanged,
+          ),
+        ],
+      );
+
+      if (!widget.variables.undefinedEnd) {
+        children.addAll([
+          const SizedBox(
+            height: 30,
+          ),
           Container(
-            height: 200,
+            height: 175,
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
               border: Border.all(
@@ -466,9 +508,9 @@ class _DateTimeFieldsState extends State<DateTimeFields>
                 ],
               ),
             ),
-          )
-        ],
-      );
+          ),
+        ]);
+      }
     }
 
     return Column(

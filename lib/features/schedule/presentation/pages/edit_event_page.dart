@@ -62,6 +62,7 @@ class _EditEventBodyState extends State<EditEventBody> {
   bool isRoutineIsEnabled = false;
   bool isRoutine = false;
   String frequency = "";
+  bool undefinedEnd = true;
   EndMode endMode = EndMode.endDate;
   bool isTask = false;
   bool isCollective = false;
@@ -95,13 +96,18 @@ class _EditEventBodyState extends State<EditEventBody> {
       frequency = event.eventInfo.frequency as String;
     }
     _controllers.interval.text = event.eventInfo.interval.toString();
-    if (event.eventInfo.endDate != null) {
-      endMode = EndMode.endDate;
-      _controllers.endDate.text = Utils.convertDateStrPattern(
-          event.eventInfo.endDate as String, "yyyy-MM-dd", "dd/MM/yyyy");
-    } else if (event.eventInfo.isRoutine) {
-      endMode = EndMode.times;
-      _controllers.times.text = event.eventInfo.times.toString();
+    if (isRoutine) {
+      undefinedEnd = event.eventInfo.undefinedEnd as bool;
+      if (!undefinedEnd) {
+        if (!(event.eventInfo.undefinedEnd as bool)) {
+          endMode = EndMode.endDate;
+          _controllers.endDate.text = Utils.convertDateStrPattern(
+              event.eventInfo.endDate as String, "yyyy-MM-dd", "dd/MM/yyyy");
+        } else if (event.eventInfo.isRoutine) {
+          endMode = EndMode.times;
+          _controllers.times.text = event.eventInfo.times.toString();
+        }
+      }
     }
 
     isTask = event.eventInfo.isTask;
@@ -143,6 +149,12 @@ class _EditEventBodyState extends State<EditEventBody> {
   setIsRoutine(value) {
     setState(() {
       isRoutine = value;
+    });
+  }
+
+  setUndefinedEnd(value) {
+    setState(() {
+      undefinedEnd = value;
     });
   }
 
@@ -239,6 +251,7 @@ class _EditEventBodyState extends State<EditEventBody> {
           frequency: frequency,
           interval: interval,
           weekDays: "",
+          undefinedEnd: undefinedEnd,
           endDate: endDate,
           times: times,
         ),
@@ -322,6 +335,7 @@ class _EditEventBodyState extends State<EditEventBody> {
                   endTimeIsEnabled: endTimeIsEnabled,
                   isRoutineIsEnabled: isRoutineIsEnabled,
                   isRoutine: isRoutine,
+                  undefinedEnd: undefinedEnd,
                   endMode: endMode,
                   frequency: frequency,
                   isTask: isTask,
@@ -334,6 +348,7 @@ class _EditEventBodyState extends State<EditEventBody> {
                   setEndTimeIsEnabled: setEndTimeIsEnabled,
                   setIsRoutineIsEnabled: setIsRoutineIsEnabled,
                   setIsRoutine: setIsRoutine,
+                  setUndefinedEnd: setUndefinedEnd,
                   setEndMode: setEndMode,
                   setFrequency: setFrequency,
                   setIsTask: setIsTask,

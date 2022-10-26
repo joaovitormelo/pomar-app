@@ -14,6 +14,7 @@ class EventInfoModel extends Equatable {
   final String? frequency;
   final int? interval;
   final String? weekDays;
+  final bool? undefinedEnd;
   final String? endDate;
   final int? times;
 
@@ -31,6 +32,7 @@ class EventInfoModel extends Equatable {
     required this.frequency,
     required this.interval,
     required this.weekDays,
+    required this.undefinedEnd,
     required this.endDate,
     required this.times,
   });
@@ -50,6 +52,7 @@ class EventInfoModel extends Equatable {
       frequency: event['frequency'],
       interval: event['interval'],
       weekDays: event['week_days'],
+      undefinedEnd: event['undefined_end'],
       endDate: event['end_date'],
       times: event['times'],
     );
@@ -69,6 +72,7 @@ class EventInfoModel extends Equatable {
       'frequency': frequency,
       'interval': interval,
       'week_days': weekDays,
+      'undefined_end': undefinedEnd,
       'end_date': endDate,
       'times': times,
     };

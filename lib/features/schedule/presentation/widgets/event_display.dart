@@ -102,7 +102,7 @@ class EventDisplay extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
+            padding: const EdgeInsets.all(5),
             child: Row(
               children: row2Children,
             ),
