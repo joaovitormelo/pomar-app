@@ -476,6 +476,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
+  multi_select_flutter:
+    dependency: "direct main"
+    description:
+      name: multi_select_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.2"
   nested:
     dependency: transitive
     description:
@@ -803,6 +810,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.13"
+  time_machine:
+    dependency: "direct main"
+    description:
+      name: time_machine
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.17"
   timezone:
     dependency: transitive
     description:

@@ -1,41 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class EventDisplay extends StatelessWidget {
   final EventData eventD;
+  final DateTime day;
   final onEventPressed;
   const EventDisplay(
-      {Key? key, required this.eventD, required this.onEventPressed})
+      {Key? key,
+      required this.eventD,
+      required this.day,
+      required this.onEventPressed})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     String textTime = '';
     EventModel event = eventD.event;
-    if (event.eventInfo.initTime != null && event.eventInfo.endTime != null) {
-      String endTime = event.eventInfo.endTime as String;
+    List<AssignmentModel> assignmentList = eventD.assignments;
+    if (event.initTime != null && event.endTime != null) {
+      String endTime = event.endTime as String;
       textTime =
-          '${(event.eventInfo.initTime as String).substring(0, 5)} - ${endTime.substring(0, 5)}';
+          '${(event.initTime as String).substring(0, 5)} - ${endTime.substring(0, 5)}';
     }
     late Color color;
-    if (event.eventInfo.isTask) {
+    bool taskIsCompleted = false;
+    var completedCount = 0;
+    var assignmentsCount = assignmentList.length;
+    if (event.isTask) {
       color = Colors.green;
+      assignmentList.map((assignment) {
+        if (assignment.isCompleted == true) {
+          completedCount += 1;
+        }
+      }).toList();
+      if (isSameDay(day, DateTime.now())) {
+        if (event.isCollective as bool) {
+          if (completedCount > 0) {
+            taskIsCompleted = true;
+          }
+        } else {
+          if (completedCount == assignmentsCount) {
+            taskIsCompleted = true;
+          }
+        }
+      }
     } else {
       color = Colors.blue;
     }
     List<Widget> row1Children = [];
     row1Children.add(Text(
-      event.eventInfo.title,
+      event.title,
       textAlign: TextAlign.left,
-      style: const TextStyle(
+      style: TextStyle(
         color: Colors.white,
         fontSize: 13,
-        decoration: TextDecoration.none,
+        decoration: taskIsCompleted ? TextDecoration.lineThrough : null,
+        decorationThickness: 2,
       ),
     ));
-    if (event.eventInfo.isRoutine) {
+    if (event.isRoutine) {
       row1Children.add(
         const Icon(
           FontAwesomeIcons.arrowsRotate,
@@ -50,7 +77,7 @@ class EventDisplay extends StatelessWidget {
         children: row1Children,
       )
     ];
-    if (!event.eventInfo.allDay) {
+    if (!event.allDay) {
       collumn1Children.add(Text(
         textTime,
         textAlign: TextAlign.left,
@@ -58,23 +85,14 @@ class EventDisplay extends StatelessWidget {
       ));
     }
     List<Widget> row2Children = [];
-    if (event.eventInfo.isTask) {
+    if (event.isTask) {
       row2Children.add(
-        Padding(
-          padding: const EdgeInsets.all(5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(
-                Icons.check_box_outlined,
-                size: 18,
-                color: Colors.white,
-              ),
-              Text(
-                "(1/2)",
-                style: TextStyle(fontSize: 10, color: Colors.white),
-              )
-            ],
+        const Padding(
+          padding: EdgeInsets.all(5),
+          child: Icon(
+            FontAwesomeIcons.listCheck,
+            size: 18,
+            color: Colors.white,
           ),
         ),
       );

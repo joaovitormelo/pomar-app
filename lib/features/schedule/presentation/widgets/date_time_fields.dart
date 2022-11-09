@@ -163,6 +163,9 @@ class _DateTimeFieldsState extends State<DateTimeFields>
   onEndDatePickerTapped() async {
     DateTime initialDate =
         DateFormat("dd/MM/yyyy").parse(widget.controllers.date.text);
+    if (DateTime.now().compareTo(initialDate) > 0) {
+      initialDate = DateTime.now();
+    }
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -388,6 +391,32 @@ class _DateTimeFieldsState extends State<DateTimeFields>
               ),
             ],
           ),
+        ],
+      );
+      if (widget.variables.frequency == "W") {
+        children.addAll([
+          const SizedBox(
+            height: 30,
+          ),
+          FormBuilderFilterChip(
+            name: "week_days",
+            selectedColor: Colors.blue,
+            showCheckmark: false,
+            decoration: InputDecoration(border: InputBorder.none),
+            options: const [
+              FormBuilderChipOption(value: "Dom"),
+              FormBuilderChipOption(value: "Seg"),
+              FormBuilderChipOption(value: "Ter"),
+              FormBuilderChipOption(value: "Qua"),
+              FormBuilderChipOption(value: "Qui"),
+              FormBuilderChipOption(value: "Sex"),
+              FormBuilderChipOption(value: "Sab"),
+            ],
+          ),
+        ]);
+      }
+      children.addAll(
+        [
           const SizedBox(
             height: 30,
           ),

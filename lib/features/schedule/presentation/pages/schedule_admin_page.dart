@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
@@ -11,14 +10,16 @@ import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
+import 'package:pomar_app/features/schedule/data/models/event_model.dart';
+import 'package:pomar_app/features/schedule/domain/usecases/do_delete_event.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/bloc.dart';
-import 'package:pomar_app/features/schedule/presentation/helpers/event_data_source.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/delete_event/delete_event_bloc.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/delete_event/delete_event_events.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/delete_event/delete_event_states.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/custom_calendar.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_detail_modal.dart';
-import 'package:pomar_app/features/schedule/presentation/widgets/event_display.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 const textScheduleLoadError = "Erro";
 const textScheduleAdminTitle = "Agenda";
@@ -35,6 +36,9 @@ class ScheduleAdminPage extends StatelessWidget {
         ),
         BlocProvider<EmployeesBloc>(
           create: (context) => Globals.sl<EmployeesBloc>(),
+        ),
+        BlocProvider(
+          create: (context) => Globals.sl<DeleteEventBloc>(),
         ),
       ],
       child: const ScheduleAdminBody(),
@@ -61,7 +65,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
   }
 
-  _onEventPressed(EventData eventD, List<Employee> employeeList) {
+  _onEventPressed(DateTime day, EventData eventD, List<Employee> employeeList) {
     showBarModalBottomSheet(
       context: context,
       expand: false,
@@ -70,6 +74,28 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
         eventD: eventD,
         employeeList: employeeList,
         onEditButtonPressed: _onEditButtonPressed,
+        onDelete: _onDelete,
+        day: day,
+      ),
+    );
+  }
+
+  _onDelete(
+    DateTime day,
+    EventModel event,
+    bool allRoutine,
+  ) {
+    String excludeDate = DateFormat("yyyy-MM-dd").format(day);
+    List<String> excludeDates = [];
+    if (!allRoutine) {
+      excludeDates.add(excludeDate);
+    }
+    BlocProvider.of<DeleteEventBloc>(context).add(
+      DeleteEventButtonPressed(
+        params: DeleteEventParams(
+          idEvent: event.idEvent,
+          excludeDates: excludeDates,
+        ),
       ),
     );
   }
@@ -84,41 +110,31 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
       ],
     ).then(
       (wasEdited) {
-        BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
         if (wasEdited != null) {
+          BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
           Navigator.pop(context);
         }
       },
     );
   }
 
-  _changeCalendarView(CalendarView newView) {
-    _calendarController.view = newView;
-    setState(() {
-      _calendarView = newView;
-    });
-  }
-
-  _getAppBarActions(CalendarView calendarView) {
-    if (calendarView == CalendarView.month) {
-      return [
-        IconButton(
-          onPressed: () => _changeCalendarView(CalendarView.timelineDay),
-          icon: const Icon(Icons.calendar_today),
-        ),
-      ];
-    }
-    return [
-      IconButton(
-        onPressed: () => _changeCalendarView(CalendarView.month),
-        icon: const Icon(Icons.calendar_month),
-      ),
-    ];
-  }
-
   _buildBody() {
     return MultiBlocListener(
       listeners: [
+        BlocListener<DeleteEventBloc, DeleteEventState>(
+            listener: (context, state) {
+          if (state is DeleteEventLoading) {
+            Utils.showLoadingEntirePage(context);
+          } else if (state is DeleteEventSuccess) {
+            Navigator.pop(context);
+            Navigator.pop(context);
+            BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
+          } else if (state is DeleteEventError) {
+            Navigator.pop(context);
+            Navigator.pop(context);
+            Utils.showSnackBar(context, state.msg);
+          }
+        }),
         BlocListener<ReadEventsBloc, ReadEventsState>(
           listenWhen: (_, state) => state is ReadEventsError,
           listener: (context, state) {
@@ -151,10 +167,6 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
           } else {
             List<EventData> eventDataList =
                 (readEventsState as ReadEventsHasData).eventList;
-            LinkedHashMap<DateTime, List<EventData>> eventsPerDay =
-                LinkedHashMap<DateTime, List<EventData>>(
-              equals: isSameDay,
-            );
             if (employeesState is EmployeesHasData) {
               employeeList = employeesState.employees;
             }
@@ -178,7 +190,6 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(textScheduleAdminTitle),
-        actions: _getAppBarActions(_calendarView),
       ),
       floatingActionButton: Builder(builder: (context) {
         final readEventsState = context.watch<ReadEventsBloc>().state;
@@ -193,9 +204,8 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
                 FluroRoutes.addEventRoute,
                 arguments: employeesState.employees,
               ).then(
-                (value) => BlocProvider.of<EmployeesBloc>(context).add(
-                  LoadEmployees(),
-                ),
+                (value) =>
+                    BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents()),
               );
             },
             child: const Icon(Icons.add),

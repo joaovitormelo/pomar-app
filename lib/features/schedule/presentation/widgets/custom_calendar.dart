@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:pomar_app/core/utils/Utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
@@ -5,6 +7,7 @@ import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_display.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:time_machine/time_machine.dart';
 
 const weekDays = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
 
@@ -28,26 +31,30 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  Period _getPeriodBetweenDays(DateTime day1DateTime, DateTime day2DateTime) {
+    LocalDate day1 = LocalDate.dateTime(day1DateTime);
+    LocalDate day2 = LocalDate.dateTime(day2DateTime);
+    return day1.periodSince(day2);
+  }
+
   _determineIfDailyRoutineEventExistsInDay(EventModel event, DateTime day) {
-    DateTime date = Utils.strToDate(event.date);
-    var diff = day.difference(date);
-    var divisionRest = diff.inDays % (event.eventInfo.interval as int);
+    DateTime date = (Utils.strToDate(event.date) as DateTime);
+    var diff = day.add(Duration(hours: 5)).difference(date);
+    var divisionRest = diff.inDays % (event.interval as int);
     if (divisionRest == 0) {
-      if (event.eventInfo.undefinedEnd as bool) {
+      if (event.undefinedEnd as bool) {
         return true;
       } else {
-        if (event.eventInfo.endDate != null) {
-          if (date.compareTo(
-                  Utils.strToDate(event.eventInfo.endDate as String)) <=
-              0) {
+        if (event.endDate != null) {
+          if (date.compareTo(Utils.strToDate(event.endDate as String)) <= 0) {
             return true;
           } else {
             return false;
           }
         } else {
           var divisionQuocient =
-              diff.inDays / (event.eventInfo.interval as int).floor();
-          if (divisionQuocient <= (event.eventInfo.times as int)) {
+              (diff.inDays / (event.interval as int)).floor() + 1;
+          if (divisionQuocient <= (event.times as int)) {
             return true;
           } else {
             return false;
@@ -61,24 +68,23 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
 
   _determineIfWeeklyRoutineEventExistsInDay(EventModel event, DateTime day) {
     DateTime date = Utils.strToDate(event.date);
-    var diff = day.difference(date);
-    var divisionRest = diff.inDays % 7 * (event.eventInfo.interval as int);
+    var diff = day.add(Duration(hours: 5)).difference(date);
+    var divisionRest = diff.inDays % 7 * (event.interval as int);
     if (divisionRest == 0) {
-      if (event.eventInfo.undefinedEnd as bool) {
+      if (event.undefinedEnd as bool) {
         return true;
       } else {
-        if (event.eventInfo.endDate != null) {
-          if (date.compareTo(
-                  Utils.strToDate(event.eventInfo.endDate as String)) <=
-              0) {
+        if (event.endDate != null) {
+          DateTime endDate = Utils.strToDate(event.endDate as String);
+          if (day.compareTo(endDate) <= 0) {
             return true;
           } else {
             return false;
           }
         } else {
           var divisionQuocient =
-              diff.inDays / 7 * (event.eventInfo.interval as int).floor();
-          if (divisionQuocient <= (event.eventInfo.times as int)) {
+              (diff.inDays / 7 * (event.interval as int)).floor() + 1;
+          if (divisionQuocient <= (event.times as int)) {
             return true;
           } else {
             return false;
@@ -92,24 +98,23 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
 
   _determineIfMonthlyRoutineEventExistsInDay(EventModel event, DateTime day) {
     DateTime date = Utils.strToDate(event.date);
-    var monthDiff = day.month - date.month;
-    var divisionRest = monthDiff % (event.eventInfo.interval as int);
+    int monthDiff =
+        _getPeriodBetweenDays(day, Utils.strToDate(event.date)).days;
+    print(monthDiff);
+    var divisionRest = monthDiff % (event.interval as int);
     if (date.day == day.day && divisionRest == 0) {
-      if (event.eventInfo.undefinedEnd as bool) {
+      if (event.undefinedEnd as bool) {
         return true;
       } else {
-        if (event.eventInfo.endDate != null) {
-          if (date.compareTo(
-                  Utils.strToDate(event.eventInfo.endDate as String)) <=
-              0) {
+        if (event.endDate != null) {
+          if (date.compareTo(Utils.strToDate(event.endDate as String)) <= 0) {
             return true;
           } else {
             return false;
           }
         } else {
-          var divisionQuocient =
-              monthDiff / (event.eventInfo.interval as int).floor();
-          if (divisionQuocient <= (event.eventInfo.times as int)) {
+          var divisionQuocient = (monthDiff / (event.interval as int)).floor();
+          if (divisionQuocient <= (event.times as int)) {
             return true;
           } else {
             return false;
@@ -124,23 +129,20 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
   _determineIfYearlyRoutineEventExistsInDay(EventModel event, DateTime day) {
     DateTime date = Utils.strToDate(event.date);
     var yearDiff = day.year - date.year;
-    var divisionRest = yearDiff % (event.eventInfo.interval as int);
+    var divisionRest = yearDiff % (event.interval as int);
     if (date.day == day.day && date.month == day.month && divisionRest == 0) {
-      if (event.eventInfo.undefinedEnd as bool) {
+      if (event.undefinedEnd as bool) {
         return true;
       } else {
-        if (event.eventInfo.endDate != null) {
-          if (date.compareTo(
-                  Utils.strToDate(event.eventInfo.endDate as String)) <=
-              0) {
+        if (event.endDate != null) {
+          if (date.compareTo(Utils.strToDate(event.endDate as String)) <= 0) {
             return true;
           } else {
             return false;
           }
         } else {
-          var divisionQuocient =
-              yearDiff / (event.eventInfo.interval as int).floor();
-          if (divisionQuocient <= (event.eventInfo.times as int)) {
+          var divisionQuocient = yearDiff / (event.interval as int).floor();
+          if (divisionQuocient <= (event.times as int)) {
             return true;
           } else {
             return false;
@@ -154,28 +156,45 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
 
   _loadEventsPerDay(DateTime day, List<EventData> eventDataList) {
     return eventDataList.where((eventData) {
-      var event = eventData.event;
-      DateTime date = Utils.strToDate(event.date);
-      if (event.eventInfo.isRoutine) {
-        var diff = day.difference(date);
-        if (diff.inSeconds < 0) {
+      EventModel event = eventData.event;
+      if (event.isRoutine) {
+        DateTime initialDate = Utils.strToDate(event.date);
+        var diff = day.difference(initialDate);
+        if (diff.inDays < 0) {
           return false;
         } else {
-          if (event.eventInfo.frequency == "D") {
+          bool isExcluded = false;
+          eventData.exclusions.map((exclusion) {
+            if (isSameDay(Utils.strToDateTime(exclusion.date), day)) {
+              isExcluded = true;
+            }
+          }).toList();
+          if (isExcluded) {
+            return false;
+          }
+          if (event.isTask) {
+            DateTime today = DateTime.now();
+            if (today.difference(day).inDays > 0) {
+              return false;
+            }
+          }
+          if (event.frequency == "D") {
             return _determineIfDailyRoutineEventExistsInDay(event, day);
-          } else if (event.eventInfo.frequency == "W") {
+          } else if (event.frequency == "W") {
             return _determineIfWeeklyRoutineEventExistsInDay(event, day);
-          } else if (event.eventInfo.frequency == "M") {
+          } else if (event.frequency == "M") {
             return _determineIfMonthlyRoutineEventExistsInDay(event, day);
           } else {
             return _determineIfYearlyRoutineEventExistsInDay(event, day);
           }
         }
       } else {
+        DateTime date = Utils.strToDate(event.date);
         if (isSameDay(date, day)) {
           return true;
+        } else {
+          return false;
         }
-        return false;
       }
     }).toList();
   }
@@ -326,8 +345,12 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
                                   itemCount: events.length,
                                   itemBuilder: (context, index) => EventDisplay(
                                     eventD: events[index],
+                                    day: _selectedDay as DateTime,
                                     onEventPressed: () => widget.onEventPressed(
-                                        events[index], widget.employeeList),
+                                      _selectedDay,
+                                      events[index],
+                                      widget.employeeList,
+                                    ),
                                   ),
                                 ),
                               ),

@@ -22,13 +22,11 @@ class TaskFieldsVariables {
 class TaskFieldsSetters {
   final setIsTask;
   final setIsCollective;
-  final setEmployeeList;
   final setAssignedEmployees;
 
   TaskFieldsSetters({
     required this.setIsTask,
     required this.setIsCollective,
-    required this.setEmployeeList,
     required this.setAssignedEmployees,
   });
 }
@@ -49,6 +47,13 @@ class TaskFields extends StatefulWidget {
 
 class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
   TextEditingController assignmentController = TextEditingController();
+  List<Employee> employeeList = [];
+
+  @override
+  initState() {
+    super.initState();
+    employeeList = [...widget.variables.employeeList];
+  }
 
   _onIsTaskChanged(value) {
     widget.setters.setIsTask(value);
@@ -67,12 +72,12 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
     setters.setAssignedEmployees(assignedEmployees);
     List<Employee> employeeList = variables.employeeList;
     employeeList.remove(employee);
-    setModalState(() {
-      setters.setEmployeeList(employeeList);
-    });
     if (employeeList.isEmpty) {
       Navigator.pop(modalContext);
     }
+    setModalState(() {
+      this.employeeList = employeeList;
+    });
     assignmentController.text = " ";
   }
 
@@ -89,7 +94,9 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
 
     List<Employee> employeeList = variables.employeeList;
     employeeList.add(employee);
-    setters.setEmployeeList(employeeList);
+    setState(() {
+      this.employeeList = employeeList;
+    });
   }
 
   @override
@@ -190,7 +197,6 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
                       padding: const EdgeInsets.all(8.0),
                       child: StatefulBuilder(
                         builder: (context, setModalState) {
-                          List<Employee> employeeList = variables.employeeList;
                           if (employeeList.isNotEmpty) {
                             return ListView.separated(
                               separatorBuilder: (_, i) => const Divider(),

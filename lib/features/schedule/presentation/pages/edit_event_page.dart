@@ -5,7 +5,6 @@ import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
-import 'package:pomar_app/features/schedule/data/models/event_info_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_edit_event.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
@@ -61,7 +60,7 @@ class _EditEventBodyState extends State<EditEventBody> {
   bool endTimeIsEnabled = false;
   bool isRoutineIsEnabled = false;
   bool isRoutine = false;
-  String frequency = "";
+  String? frequency;
   bool undefinedEnd = true;
   EndMode endMode = EndMode.endDate;
   bool isTask = false;
@@ -78,41 +77,45 @@ class _EditEventBodyState extends State<EditEventBody> {
     EventModel event = widget.eventD.event;
     List<AssignmentModel> assignmentList = widget.eventD.assignments;
 
-    _controllers.title.text = event.eventInfo.title;
+    _controllers.title.text = event.title;
 
-    allDay = event.eventInfo.allDay;
-    if (event.eventInfo.initTime != null) {
-      _controllers.initTime.text = event.eventInfo.initTime as String;
+    allDay = event.allDay;
+    if (event.initTime != null) {
+      _controllers.initTime.text = Utils.convertDateStrPattern(
+          event.initTime as String, "HH:mm:ss", "HH:mm");
       endTimeIsEnabled = true;
     }
-    if (event.eventInfo.endTime != null) {
-      _controllers.endTime.text = event.eventInfo.endTime as String;
+    if (event.endTime != null) {
+      _controllers.endTime.text = Utils.convertDateStrPattern(
+          event.endTime as String, "HH:mm:ss", "HH:mm");
     }
     _controllers.date.text =
         Utils.convertDateStrPattern(event.date, "yyyy-MM-dd", "dd/MM/yyyy");
     isRoutineIsEnabled = true;
-    isRoutine = event.eventInfo.isRoutine;
-    if (event.eventInfo.frequency != null) {
-      frequency = event.eventInfo.frequency as String;
-    }
-    _controllers.interval.text = event.eventInfo.interval.toString();
+    isRoutine = event.isRoutine;
     if (isRoutine) {
-      undefinedEnd = event.eventInfo.undefinedEnd as bool;
+      if (event.frequency != null) {
+        frequency = event.frequency as String;
+      }
+      if (event.interval != null) {
+        _controllers.interval.text = event.interval.toString();
+      }
+      undefinedEnd = event.undefinedEnd as bool;
       if (!undefinedEnd) {
-        if (!(event.eventInfo.undefinedEnd as bool)) {
+        if (event.endDate != null) {
           endMode = EndMode.endDate;
           _controllers.endDate.text = Utils.convertDateStrPattern(
-              event.eventInfo.endDate as String, "yyyy-MM-dd", "dd/MM/yyyy");
-        } else if (event.eventInfo.isRoutine) {
+              event.endDate as String, "yyyy-MM-dd", "dd/MM/yyyy");
+        } else {
           endMode = EndMode.times;
-          _controllers.times.text = event.eventInfo.times.toString();
+          _controllers.times.text = event.times.toString();
         }
       }
     }
 
-    isTask = event.eventInfo.isTask;
-    if (event.eventInfo.isCollective != null) {
-      isCollective = event.eventInfo.isCollective as bool;
+    isTask = event.isTask;
+    if (event.isCollective != null) {
+      isCollective = event.isCollective as bool;
     }
     employeeList = employeeList.where((employee) {
       bool isAssigned = false;
@@ -125,7 +128,7 @@ class _EditEventBodyState extends State<EditEventBody> {
       return !isAssigned;
     }).toList();
 
-    _controllers.description.text = event.eventInfo.description;
+    _controllers.description.text = event.description;
   }
 
   setAllDay(value) {
@@ -182,12 +185,6 @@ class _EditEventBodyState extends State<EditEventBody> {
     });
   }
 
-  setEmployeeList(value) {
-    setState(() {
-      employeeList = value;
-    });
-  }
-
   setAssignedEmployees(value) {
     setState(() {
       assignedEmployees = value;
@@ -221,41 +218,43 @@ class _EditEventBodyState extends State<EditEventBody> {
       }
       if (isRoutine) {
         interval = int.parse(intervalStr);
-        if (endMode == EndMode.endDate) {
-          endDate = DateFormat("yyyy-MM-dd").format(
-            DateFormat("dd/MM/yyyy").parse(
-              endDateStr,
-            ),
-          );
+        if (undefinedEnd) {
           times = null;
-        } else {
-          times = int.parse(timesStr);
           endDate = null;
+        } else {
+          if (endMode == EndMode.endDate) {
+            endDate = DateFormat("yyyy-MM-dd").format(
+              DateFormat("dd/MM/yyyy").parse(
+                endDateStr,
+              ),
+            );
+            times = null;
+          } else {
+            times = int.parse(timesStr);
+            endDate = null;
+          }
         }
       }
 
       EventModel oldEvent = widget.eventD.event;
       EventModel event = EventModel(
         idEvent: oldEvent.idEvent,
-        eventInfo: EventInfoModel(
-          idEventInfo: oldEvent.eventInfo.idEventInfo,
-          title: title,
-          initTime: initTime,
-          endTime: endTime,
-          allDay: allDay,
-          description: description,
-          isTask: isTask,
-          isCollective: isCollective,
-          isRoutine: isRoutine,
-          initDate: date,
-          frequency: frequency,
-          interval: interval,
-          weekDays: "",
-          undefinedEnd: undefinedEnd,
-          endDate: endDate,
-          times: times,
-        ),
         date: date,
+        title: title,
+        initTime: initTime,
+        endTime: endTime,
+        allDay: allDay,
+        description: description,
+        isTask: isTask,
+        isCollective: isCollective,
+        isRoutine: isRoutine,
+        initDate: date,
+        frequency: frequency,
+        interval: interval,
+        weekDays: "",
+        undefinedEnd: undefinedEnd,
+        endDate: endDate,
+        times: times,
       );
 
       List<AssignmentModel> assignmentList = [];
@@ -280,6 +279,10 @@ class _EditEventBodyState extends State<EditEventBody> {
           ),
         ),
       );
+
+      setState(() {
+        assignedEmployees = [];
+      });
     }
   }
 
@@ -353,7 +356,6 @@ class _EditEventBodyState extends State<EditEventBody> {
                   setFrequency: setFrequency,
                   setIsTask: setIsTask,
                   setIsCollective: setIsCollective,
-                  setEmployeeList: setEmployeeList,
                   setAssignedEmployees: setAssignedEmployees,
                 ),
               ),

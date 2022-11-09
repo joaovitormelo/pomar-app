@@ -76,7 +76,6 @@ class WhatsAppServerSource {
       method: ServerRoutes.sendMessages.method,
       headers: {"Authorization": jwtToken},
     );
-    inspect(params);
     var data = {
       "contact_list": params.contactList.map((e) => e.toJson()).toList(),
       "message": params.msg,
@@ -93,7 +92,6 @@ class WhatsAppServerSource {
       throw ConnectionError();
     }
     if (response.statusCode == 200) {
-      inspect(response.data);
       List<ContactModel> contactList = (response.data as List)
           .map<ContactModel>(
             (contact) => ContactModel.fromJson(contact),

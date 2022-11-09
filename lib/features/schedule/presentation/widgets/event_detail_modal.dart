@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,6 +8,7 @@ import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 const textEventDetailModalTitle = "Detalhes do evento";
 const double sizeInfoText = 18;
@@ -16,12 +19,16 @@ class EventDetailModal extends StatelessWidget {
   final EventData eventD;
   final List<Employee> employeeList;
   final onEditButtonPressed;
+  final onDelete;
+  final DateTime day;
 
   const EventDetailModal(
       {Key? key,
       required this.eventD,
       required this.employeeList,
-      required this.onEditButtonPressed})
+      required this.onEditButtonPressed,
+      required this.onDelete,
+      required this.day})
       : super(key: key);
 
   _getTimeColumnChildren(EventModel event) {
@@ -55,35 +62,35 @@ class EventDetailModal extends StatelessWidget {
     ];
 
     var textDate = '';
-    if (!event.eventInfo.isRoutine) {
+    if (!event.isRoutine) {
       textDate += DateFormat("dd/MM/yyyy").format(Utils.strToDate(event.date));
     } else {
-      if (event.eventInfo.frequency == 'D') {
-        if (event.eventInfo.interval == 1) {
+      if (event.frequency == 'D') {
+        if (event.interval == 1) {
           textDate += 'Todos os dias';
         } else {
-          textDate += 'A cada ${event.eventInfo.interval} dias';
+          textDate += 'A cada ${event.interval} dias';
         }
-      } else if (event.eventInfo.frequency == 'W') {
-        if (event.eventInfo.interval == 1) {
+      } else if (event.frequency == 'W') {
+        if (event.interval == 1) {
           textDate += 'Toda semana';
         } else {
-          textDate += 'A cada ${event.eventInfo.interval} semanas';
+          textDate += 'A cada ${event.interval} semanas';
         }
-      } else if (event.eventInfo.frequency == 'M') {
-        if (event.eventInfo.interval == 1) {
+      } else if (event.frequency == 'M') {
+        if (event.interval == 1) {
           textDate += 'Todo mês';
         } else {
-          textDate += 'A cada ${event.eventInfo.interval} meses';
+          textDate += 'A cada ${event.interval} meses';
         }
       }
-      if (!(event.eventInfo.undefinedEnd as bool)) {
+      if (!(event.undefinedEnd as bool)) {
         textDate += ', ';
-        if (event.eventInfo.endDate != null) {
+        if (event.endDate != null) {
           textDate +=
-              'até ${DateFormat("dd/MM/yyyy").format(Utils.strToDate(event.eventInfo.endDate as String))}';
+              'até ${DateFormat("dd/MM/yyyy").format(Utils.strToDate(event.endDate as String))}';
         } else {
-          textDate += '${event.eventInfo.times} vezes';
+          textDate += '${event.times} vezes';
         }
       }
     }
@@ -98,12 +105,12 @@ class EventDetailModal extends StatelessWidget {
     ]);
 
     var textTime = '';
-    if (event.eventInfo.allDay) {
+    if (event.allDay) {
       textTime += "Dia todo";
     } else {
-      textTime += (event.eventInfo.initTime as String).substring(0, 5);
-      if (event.eventInfo.endTime != null) {
-        String endTime = (event.eventInfo.endTime as String).substring(0, 5);
+      textTime += (event.initTime as String).substring(0, 5);
+      if (event.endTime != null) {
+        String endTime = (event.endTime as String).substring(0, 5);
         textTime += " às $endTime";
       }
     }
@@ -156,13 +163,15 @@ class EventDetailModal extends StatelessWidget {
     }).toList();
 
     bool isCompleted = false;
-    if (event.eventInfo.isCollective as bool) {
-      if (completedCount > 0) {
-        isCompleted = true;
-      }
-    } else {
-      if (completedCount == assignments.length) {
-        isCompleted = true;
+    if (isSameDay(day, DateTime.now())) {
+      if (event.isCollective as bool) {
+        if (completedCount > 0) {
+          isCompleted = true;
+        }
+      } else {
+        if (completedCount == assignments.length) {
+          isCompleted = true;
+        }
       }
     }
 
@@ -208,14 +217,8 @@ class EventDetailModal extends StatelessWidget {
             const SizedBox(
               width: 5,
             ),
-            Expanded(
-              child: Text(
-                employeeName,
-                style: const TextStyle(fontSize: sizeInfoText),
-              ),
-            ),
             Text(
-              "Status: $statusText",
+              employeeName,
               style: const TextStyle(fontSize: sizeInfoText),
             ),
           ],
@@ -255,12 +258,57 @@ class EventDetailModal extends StatelessWidget {
         height: 10,
       ),
       Text(
-        event.eventInfo.description,
+        event.description,
         style: const TextStyle(fontSize: sizeInfoText),
       )
     ];
 
     return descriptionColumnChildren;
+  }
+
+  _onDeleteButtonPressed(context, EventModel event) {
+    if (event.isRoutine) {
+      showDialog(
+          context: context, builder: (context) => _getDialog(context, event));
+    } else {
+      onDelete(day, event, true);
+    }
+  }
+
+  _onAllRoutineSelected(context, EventModel event) {
+    Navigator.pop(context);
+    onDelete(
+      day,
+      event,
+      true,
+    );
+  }
+
+  _onOnlyEventSelected(context, EventModel event) {
+    Navigator.pop(context);
+    onDelete(
+      day,
+      event,
+      false,
+    );
+  }
+
+  _getDialog(context, EventModel event) {
+    return AlertDialog(
+      title: const Text("Deletar evento"),
+      content:
+          const Text("Deseja deletar toda a rotina ou somente esse evento?"),
+      actions: [
+        TextButton(
+          onPressed: () => _onAllRoutineSelected(context, event),
+          child: const Text("Rotina toda"),
+        ),
+        TextButton(
+          onPressed: () => _onOnlyEventSelected(context, event),
+          child: const Text("Somente evento"),
+        ),
+      ],
+    );
   }
 
   @override
@@ -279,7 +327,9 @@ class EventDetailModal extends StatelessWidget {
             child: const Text("Editar"),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              _onDeleteButtonPressed(context, eventD.event);
+            },
             child: const Text(
               "Excluir",
               style: TextStyle(color: Colors.red),
@@ -298,7 +348,7 @@ class EventDetailModal extends StatelessWidget {
         height: 10,
       ),
       Text(
-        event.eventInfo.title,
+        event.title,
         style: const TextStyle(fontSize: 30),
       ),
       const SizedBox(
@@ -310,7 +360,7 @@ class EventDetailModal extends StatelessWidget {
       ),
     ];
 
-    if (event.eventInfo.isTask) {
+    if (event.isTask) {
       columnChildren.addAll([
         const SizedBox(
           height: spacementRows,

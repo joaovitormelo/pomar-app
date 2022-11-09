@@ -66,7 +66,6 @@ class EventFieldsSetters {
   final setFrequency;
   final setIsTask;
   final setIsCollective;
-  final setEmployeeList;
   final setAssignedEmployees;
 
   EventFieldsSetters({
@@ -79,7 +78,6 @@ class EventFieldsSetters {
     required this.setFrequency,
     required this.setIsTask,
     required this.setIsCollective,
-    required this.setEmployeeList,
     required this.setAssignedEmployees,
   });
 }
@@ -165,7 +163,6 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
         setters: TaskFieldsSetters(
           setIsTask: setters.setIsTask,
           setIsCollective: setters.setIsCollective,
-          setEmployeeList: setters.setEmployeeList,
           setAssignedEmployees: setters.setAssignedEmployees,
         ),
       ),

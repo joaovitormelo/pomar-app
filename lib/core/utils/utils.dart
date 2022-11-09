@@ -51,7 +51,7 @@ class Utils {
       String dateStr, String oldPattern, String newPattern) {
     return DateFormat(newPattern).format(
       DateFormat(oldPattern).parse(
-        dateStr.substring(0, 10),
+        dateStr,
       ),
     );
   }

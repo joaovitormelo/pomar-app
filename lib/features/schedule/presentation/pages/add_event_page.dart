@@ -6,7 +6,6 @@ import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart'
 import 'package:pomar_app/core/utils/utils.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
-import 'package:pomar_app/features/schedule/data/models/event_info_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_add_event.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/add_event/add_event_bloc.dart';
@@ -130,12 +129,6 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
     });
   }
 
-  setEmployeeList(value) {
-    setState(() {
-      employeeList = value;
-    });
-  }
-
   setAssignedEmployees(value) {
     setState(() {
       assignedEmployees = value;
@@ -189,25 +182,22 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
 
       EventModel event = EventModel(
         idEvent: 0,
-        eventInfo: EventInfoModel(
-          idEventInfo: 0,
-          title: title,
-          initTime: initTime,
-          endTime: endTime,
-          allDay: allDay,
-          description: description,
-          isTask: isTask,
-          isCollective: isCollective,
-          isRoutine: isRoutine,
-          initDate: date,
-          frequency: frequency,
-          interval: interval,
-          weekDays: "",
-          undefinedEnd: undefinedEnd,
-          endDate: endDate,
-          times: times,
-        ),
         date: date,
+        title: title,
+        initTime: initTime,
+        endTime: endTime,
+        allDay: allDay,
+        description: description,
+        isTask: isTask,
+        isCollective: isCollective,
+        isRoutine: isRoutine,
+        initDate: date,
+        frequency: frequency,
+        interval: interval,
+        weekDays: "",
+        undefinedEnd: undefinedEnd,
+        endDate: endDate,
+        times: times,
       );
 
       List<AssignmentModel> assignmentList = [];
@@ -232,6 +222,10 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
           ),
         ),
       );
+
+      setState(() {
+        assignedEmployees = [];
+      });
     }
   }
 
@@ -290,7 +284,6 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
                     setFrequency: setFrequency,
                     setIsTask: setIsTask,
                     setIsCollective: setIsCollective,
-                    setEmployeeList: setEmployeeList,
                     setAssignedEmployees: setAssignedEmployees,
                   ),
                 ),
