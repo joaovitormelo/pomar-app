@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/utils/utils.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
@@ -12,6 +16,7 @@ import 'package:pomar_app/features/schedule/presentation/bloc/edit_event/edit_ev
 import 'package:pomar_app/features/schedule/presentation/bloc/edit_event/edit_event_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/edit_event/edit_event_states.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
+import 'package:pomar_app/features/schedule/presentation/widgets/custom_calendar.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_form.dart';
 
 class EditEventPage extends StatelessWidget {
@@ -61,6 +66,7 @@ class _EditEventBodyState extends State<EditEventBody> {
   bool isRoutineIsEnabled = false;
   bool isRoutine = false;
   String? frequency;
+  String? weekDays;
   bool undefinedEnd = true;
   EndMode endMode = EndMode.endDate;
   bool isTask = false;
@@ -94,6 +100,7 @@ class _EditEventBodyState extends State<EditEventBody> {
     isRoutineIsEnabled = true;
     isRoutine = event.isRoutine;
     if (isRoutine) {
+      weekDays = event.weekDays as String;
       if (event.frequency != null) {
         frequency = event.frequency as String;
       }
@@ -173,6 +180,12 @@ class _EditEventBodyState extends State<EditEventBody> {
     });
   }
 
+  setWeekDays(value) {
+    setState(() {
+      weekDays = value;
+    });
+  }
+
   setIsTask(value) {
     setState(() {
       isTask = value;
@@ -189,6 +202,10 @@ class _EditEventBodyState extends State<EditEventBody> {
     setState(() {
       assignedEmployees = value;
     });
+  }
+
+  _isUserAdmin() {
+    return BlocProvider.of<AuthBloc>(context).state is AuthorizedAdmin;
   }
 
   _onSubmit() {
@@ -251,7 +268,7 @@ class _EditEventBodyState extends State<EditEventBody> {
         initDate: date,
         frequency: frequency,
         interval: interval,
-        weekDays: "",
+        weekDays: weekDays,
         undefinedEnd: undefinedEnd,
         endDate: endDate,
         times: times,
@@ -341,6 +358,7 @@ class _EditEventBodyState extends State<EditEventBody> {
                   undefinedEnd: undefinedEnd,
                   endMode: endMode,
                   frequency: frequency,
+                  weekDays: weekDays,
                   isTask: isTask,
                   isCollective: isCollective,
                   employeeList: employeeList,
@@ -354,10 +372,12 @@ class _EditEventBodyState extends State<EditEventBody> {
                   setUndefinedEnd: setUndefinedEnd,
                   setEndMode: setEndMode,
                   setFrequency: setFrequency,
+                  setWeekDays: setWeekDays,
                   setIsTask: setIsTask,
                   setIsCollective: setIsCollective,
                   setAssignedEmployees: setAssignedEmployees,
                 ),
+                showTaskSection: _isUserAdmin(),
               ),
             ],
           ),

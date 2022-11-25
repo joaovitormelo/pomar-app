@@ -16,7 +16,12 @@ class EditEventBloc extends Bloc<EditEventEvent, EditEventState> {
   }
 
   onEditEventButtonPressed(EditEventButtonPressed event, emit) async {
-    Session session = (authBloc.state as AuthorizedAdmin).session;
+    late Session session;
+    if (authBloc.state is AuthorizedAdmin) {
+      session = (authBloc.state as AuthorizedAdmin).session;
+    } else {
+      session = (authBloc.state as AuthorizedEmployee).session;
+    }
     emit(EditEventLoading());
     try {
       await doEditEvent(session.jwtToken, event.params);

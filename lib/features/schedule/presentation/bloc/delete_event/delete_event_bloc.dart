@@ -22,7 +22,12 @@ class DeleteEventBloc extends Bloc<DeleteEventEvent, DeleteEventState> {
 
   onDeleteEventButtonPressed(
       DeleteEventButtonPressed event, Emitter<DeleteEventState> emit) async {
-    Session session = (authBloc.state as AuthorizedAdmin).session;
+    late Session session;
+    if (authBloc.state is AuthorizedAdmin) {
+      session = (authBloc.state as AuthorizedAdmin).session;
+    } else {
+      session = (authBloc.state as AuthorizedEmployee).session;
+    }
     emit(DeleteEventLoading());
     try {
       await doDeleteEvent(session.jwtToken, event.params);

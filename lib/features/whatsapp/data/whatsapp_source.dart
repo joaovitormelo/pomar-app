@@ -5,7 +5,6 @@ import 'package:pomar_app/core/config/server_routes.dart';
 import 'package:pomar_app/core/errors/errors.dart';
 import 'package:pomar_app/features/whatsapp/connection/usecases/do_check_connection.dart';
 import 'package:pomar_app/features/whatsapp/message/data/models/contact_model.dart';
-import 'package:pomar_app/features/whatsapp/message/presentation/bloc/contact_bloc/contact_bloc.dart';
 import 'package:pomar_app/features/whatsapp/message/usecases/do_send_messages.dart';
 
 class WhatsAppServerSource {
@@ -28,7 +27,6 @@ class WhatsAppServerSource {
       print(e);
       throw ConnectionError();
     }
-    print(response);
     if (response.statusCode == 200) {
       if (response.data["err"]) {
         return WhatsAppConnectionInfo(

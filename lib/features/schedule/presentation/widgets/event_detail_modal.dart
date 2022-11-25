@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,15 +19,17 @@ class EventDetailModal extends StatelessWidget {
   final onEditButtonPressed;
   final onDelete;
   final DateTime day;
+  final bool showOptions;
 
-  const EventDetailModal(
-      {Key? key,
-      required this.eventD,
-      required this.employeeList,
-      required this.onEditButtonPressed,
-      required this.onDelete,
-      required this.day})
-      : super(key: key);
+  const EventDetailModal({
+    Key? key,
+    required this.eventD,
+    required this.employeeList,
+    required this.onEditButtonPressed,
+    required this.onDelete,
+    required this.day,
+    required this.showOptions,
+  }) : super(key: key);
 
   _getTimeColumnChildren(EventModel event) {
     List<Widget> timeColumnChildren = [
@@ -154,41 +154,6 @@ class EventDetailModal extends StatelessWidget {
         height: 10,
       ),
     ];
-
-    int completedCount = 0;
-    assignments.map((AssignmentModel assignment) {
-      if (assignment.isCompleted) {
-        completedCount++;
-      }
-    }).toList();
-
-    bool isCompleted = false;
-    if (isSameDay(day, DateTime.now())) {
-      if (event.isCollective as bool) {
-        if (completedCount > 0) {
-          isCompleted = true;
-        }
-      } else {
-        if (completedCount == assignments.length) {
-          isCompleted = true;
-        }
-      }
-    }
-
-    assignmentsColumnChildren.addAll([
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text(
-            "Situação da tarefa: ",
-            style: TextStyle(fontSize: sizeInfoText),
-          ),
-          isCompleted
-              ? const Icon(Icons.check)
-              : const Icon(FontAwesomeIcons.minus),
-        ],
-      ),
-    ]);
 
     assignments.map((AssignmentModel assignment) {
       String employeeName = '';
@@ -316,30 +281,37 @@ class EventDetailModal extends StatelessWidget {
     EventModel event = eventD.event;
     List<AssignmentModel> assignments = eventD.assignments;
 
-    List<Widget> columnChildren = [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () {
-              onEditButtonPressed(eventD);
-            },
-            child: const Text("Editar"),
-          ),
-          TextButton(
-            onPressed: () {
-              _onDeleteButtonPressed(context, eventD.event);
-            },
-            child: const Text(
-              "Excluir",
-              style: TextStyle(color: Colors.red),
+    List<Widget> columnChildren = [];
+
+    if (showOptions) {
+      columnChildren.addAll([
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: () {
+                onEditButtonPressed(eventD);
+              },
+              child: const Text("Editar"),
             ),
-          ),
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
+            TextButton(
+              onPressed: () {
+                _onDeleteButtonPressed(context, eventD.event);
+              },
+              child: const Text(
+                "Excluir",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+      ]);
+    }
+
+    columnChildren.addAll([
       const Text(
         textEventDetailModalTitle,
         style: TextStyle(fontSize: 16),
@@ -358,7 +330,7 @@ class EventDetailModal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: _getTimeColumnChildren(event),
       ),
-    ];
+    ]);
 
     if (event.isTask) {
       columnChildren.addAll([

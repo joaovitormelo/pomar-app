@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:pomar_app/core/utils/Utils.dart';
+import 'package:pomar_app/features/auth/domain/entities/person.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
@@ -15,13 +16,19 @@ class CustomCalendarPage extends StatefulWidget {
   final List<EventData> eventDataList;
   final List<Employee> employeeList;
   final onEventPressed;
+  final Person userPerson;
+  final bool userIsEmployee;
+  final onRiskTask;
 
-  const CustomCalendarPage(
-      {Key? key,
-      required this.eventDataList,
-      required this.employeeList,
-      required this.onEventPressed})
-      : super(key: key);
+  const CustomCalendarPage({
+    Key? key,
+    required this.eventDataList,
+    required this.employeeList,
+    required this.onEventPressed,
+    required this.userPerson,
+    required this.userIsEmployee,
+    required this.onRiskTask,
+  }) : super(key: key);
 
   @override
   State<CustomCalendarPage> createState() => _CustomCalendarPageState();
@@ -100,7 +107,6 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
     DateTime date = Utils.strToDate(event.date);
     int monthDiff =
         _getPeriodBetweenDays(day, Utils.strToDate(event.date)).days;
-    print(monthDiff);
     var divisionRest = monthDiff % (event.interval as int);
     if (date.day == day.day && divisionRest == 0) {
       if (event.undefinedEnd as bool) {
@@ -343,15 +349,39 @@ class _CustomCalendarPageState extends State<CustomCalendarPage> {
                                   separatorBuilder: (context, index) =>
                                       const SizedBox(height: 5),
                                   itemCount: events.length,
-                                  itemBuilder: (context, index) => EventDisplay(
-                                    eventD: events[index],
-                                    day: _selectedDay as DateTime,
-                                    onEventPressed: () => widget.onEventPressed(
-                                      _selectedDay,
-                                      events[index],
-                                      widget.employeeList,
-                                    ),
-                                  ),
+                                  itemBuilder: (context, index) {
+                                    bool isRisked = false;
+                                    if (widget.userIsEmployee) {
+                                      int idEmployee = widget.employeeList
+                                          .firstWhere((e) =>
+                                              e.person.idPerson ==
+                                              widget.userPerson.idPerson)
+                                          .idEmployee;
+                                      events[index]
+                                          .assignments
+                                          .map((assignment) {
+                                        if (assignment.idEmployee ==
+                                            idEmployee) {
+                                          if (assignment.isCompleted) {
+                                            isRisked = true;
+                                          }
+                                        }
+                                      }).toList();
+                                    }
+                                    return EventDisplay(
+                                      eventD: events[index],
+                                      day: _selectedDay as DateTime,
+                                      onEventPressed: () =>
+                                          widget.onEventPressed(
+                                        _selectedDay,
+                                        events[index],
+                                        widget.employeeList,
+                                      ),
+                                      userIsEmployee: widget.userIsEmployee,
+                                      isRisked: isRisked,
+                                      onRiskTask: widget.onRiskTask,
+                                    );
+                                  },
                                 ),
                               ),
                             );

@@ -8,6 +8,8 @@ class ContactState extends Equatable {
 
 class ContactNoData extends ContactState {}
 
+class ContactLoading extends ContactState {}
+
 class ContactHasData extends ContactState {
   final List<ContactModel> contactList;
 

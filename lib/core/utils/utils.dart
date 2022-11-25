@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:pomar_app/features/auth/domain/entities/person.dart';
+import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 
 class Utils {
   static showSnackBar(context, message) {

@@ -36,7 +36,12 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   }
 
   onLoadEmployees(LoadEmployees event, Emitter<EmployeesState> emit) async {
-    Session session = (authBloc.state as AuthorizedAdmin).session;
+    late Session session;
+    if (authBloc.state is AuthorizedAdmin) {
+      session = (authBloc.state as AuthorizedAdmin).session;
+    } else {
+      session = (authBloc.state as AuthorizedEmployee).session;
+    }
     emit(EmployeesLoading());
     try {
       List<Employee> employees = await doReadEmployees(session.jwtToken);

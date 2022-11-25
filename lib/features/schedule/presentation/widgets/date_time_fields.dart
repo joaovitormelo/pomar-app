@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
@@ -6,12 +8,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
 import 'package:pomar_app/features/schedule/presentation/pages/add_event_page.dart';
 
+import '../../../../core/utils/Utils.dart';
+
 class DateTimeFieldsVariables {
   final bool allDay;
   final bool endTimeIsEnabled;
   final bool isRoutineIsEnabled;
   final bool isRoutine;
   final String? frequency;
+  final String? weekDays;
   final bool undefinedEnd;
   final EndMode endMode;
 
@@ -21,6 +26,7 @@ class DateTimeFieldsVariables {
     required this.isRoutineIsEnabled,
     required this.isRoutine,
     required this.frequency,
+    required this.weekDays,
     required this.undefinedEnd,
     required this.endMode,
   });
@@ -32,6 +38,7 @@ class DateTimeFieldsSetters {
   final setIsRoutineIsEnabled;
   final setIsRoutine;
   final setFrequency;
+  final setWeekDays;
   final setUndefinedEnd;
   final setEndMode;
 
@@ -41,6 +48,7 @@ class DateTimeFieldsSetters {
     required this.setIsRoutineIsEnabled,
     required this.setIsRoutine,
     required this.setFrequency,
+    required this.setWeekDays,
     required this.setUndefinedEnd,
     required this.setEndMode,
   });
@@ -184,6 +192,41 @@ class _DateTimeFieldsState extends State<DateTimeFields>
 
   onAllDayChanged(value) {
     widget.setters.setAllDay(value);
+  }
+
+  getInitDateWeekDay() {
+    DateTime dateInit =
+        DateFormat("dd/MM/yyyy").parse(widget.controllers.date.text);
+    return dateInit.weekday % 7 + 1;
+  }
+
+  onFrequencyChanged(value) {
+    widget.setters.setFrequency(value);
+    String? weekDays = widget.variables.weekDays;
+    if (weekDays == null) {
+      widget.setters.setWeekDays(getInitDateWeekDay().toString());
+    }
+  }
+
+  checkIfWeekDayIsSelected(value) {
+    if (widget.variables.weekDays == null) return false;
+    return (widget.variables.weekDays as String).contains(value);
+  }
+
+  onSelectedWeekDay(value, isSelected) {
+    if (value == getInitDateWeekDay().toString()) {
+      return;
+    }
+    String? weekDays = widget.variables.weekDays;
+    if (weekDays == null) {
+      widget.setters.setWeekDays(value);
+    } else {
+      if (isSelected) {
+        widget.setters.setWeekDays(weekDays + value);
+      } else {
+        widget.setters.setWeekDays(weekDays.replaceFirst(value, ''));
+      }
+    }
   }
 
   onUndefinedEndChanged(value) {
@@ -348,7 +391,7 @@ class _DateTimeFieldsState extends State<DateTimeFields>
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (frequency) => validateString(frequency, 0, 500),
-                  onChanged: (value) => widget.setters.setFrequency(value),
+                  onChanged: onFrequencyChanged,
                   items: const [
                     DropdownMenuItem(
                       value: "D",
@@ -398,19 +441,65 @@ class _DateTimeFieldsState extends State<DateTimeFields>
           const SizedBox(
             height: 30,
           ),
-          FormBuilderFilterChip(
-            name: "week_days",
-            selectedColor: Colors.blue,
-            showCheckmark: false,
-            decoration: InputDecoration(border: InputBorder.none),
-            options: const [
-              FormBuilderChipOption(value: "Dom"),
-              FormBuilderChipOption(value: "Seg"),
-              FormBuilderChipOption(value: "Ter"),
-              FormBuilderChipOption(value: "Qua"),
-              FormBuilderChipOption(value: "Qui"),
-              FormBuilderChipOption(value: "Sex"),
-              FormBuilderChipOption(value: "Sab"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FilterChip(
+                label: const Text("Dom"),
+                onSelected: (isSelected) => onSelectedWeekDay("1", isSelected),
+                selected: checkIfWeekDayIsSelected("1"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
+              FilterChip(
+                label: const Text("Seg"),
+                onSelected: (isSelected) => onSelectedWeekDay("2", isSelected),
+                selected: checkIfWeekDayIsSelected("2"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
+              FilterChip(
+                label: const Text("Ter"),
+                onSelected: (isSelected) => onSelectedWeekDay("3", isSelected),
+                selected: checkIfWeekDayIsSelected("3"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
+              FilterChip(
+                label: const Text("Qua"),
+                onSelected: (isSelected) => onSelectedWeekDay("4", isSelected),
+                selected: checkIfWeekDayIsSelected("4"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
+              FilterChip(
+                label: const Text("Qui"),
+                onSelected: (isSelected) => onSelectedWeekDay("5", isSelected),
+                selected: checkIfWeekDayIsSelected("5"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
+              FilterChip(
+                label: const Text("Sex"),
+                onSelected: (isSelected) => onSelectedWeekDay("6", isSelected),
+                selected: checkIfWeekDayIsSelected("6"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
+              FilterChip(
+                label: const Text("Sáb"),
+                onSelected: (isSelected) => onSelectedWeekDay("7", isSelected),
+                selected: checkIfWeekDayIsSelected("7"),
+                selectedColor: Colors.blue,
+                showCheckmark: false,
+                disabledColor: Colors.grey,
+              ),
             ],
           ),
         ]);

@@ -13,16 +13,17 @@ class ReadContactListParams {
   });
 }
 
-abstract class ExcelReaderContract {
+abstract class ExcelManagerContract {
   Future<List<ContactModel>> readContactList(ReadContactListParams params);
+  //Future<void> writeContactList(List<ContactModel> contactList);
 }
 
 class DoReadContactList {
-  final ExcelReaderContract excelReader;
+  final ExcelManagerContract ExcelManager;
 
-  DoReadContactList({required this.excelReader});
+  DoReadContactList({required this.ExcelManager});
 
   call(ReadContactListParams params) async {
-    return await excelReader.readContactList(params);
+    return await ExcelManager.readContactList(params);
   }
 }

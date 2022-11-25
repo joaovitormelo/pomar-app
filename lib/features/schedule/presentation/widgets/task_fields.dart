@@ -146,7 +146,7 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
     ];
     if (variables.isTask) {
       children.addAll([
-        const SizedBox(
+        /*const SizedBox(
           height: 30,
         ),
         FormBuilderSwitch(
@@ -165,7 +165,7 @@ class _TaskFieldsState extends State<TaskFields> with InputValidationMixin {
             prefixIcon: Icon(FontAwesomeIcons.userGroup),
           ),
           onChanged: _onIsCollectiveChanged,
-        ),
+        ),*/
         const SizedBox(
           height: 30,
         ),

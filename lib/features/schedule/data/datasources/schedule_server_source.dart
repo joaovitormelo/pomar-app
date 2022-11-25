@@ -58,6 +58,51 @@ class ScheduleServerSource {
     }
   }
 
+  readEventsByEmployee(String token, int idPerson) async {
+    Options options = Options(
+      method: ServerRoutes.readEventsByEmployee.method,
+      headers: {
+        "Authorization": token,
+      },
+    );
+    Response response;
+    try {
+      response = await dio.request(
+        ServerRoutes.readEventsByEmployee.path,
+        options: options,
+        data: {
+          "id_person": idPerson,
+        },
+      );
+    } catch (e) {
+      print(e);
+      throw ConnectionError();
+    }
+    if (response.statusCode == 200) {
+      List<EventData> eventDataList =
+          (response.data as List).map<EventData>((eventData) {
+        List<AssignmentModel> assignments = eventData['assignments']
+            .map<AssignmentModel>(
+                (assignment) => AssignmentModel.fromJSON(assignment))
+            .toList();
+        inspect(eventData);
+        List<RoutineExclusionModel> routineExclusionList =
+            eventData["routine_exclusion_list"]
+                .map<RoutineExclusionModel>((routineExclusion) =>
+                    RoutineExclusionModel.fromJSON(routineExclusion))
+                .toList();
+        return EventData(
+          event: EventModel.fromJSON(eventData['event']),
+          assignments: assignments,
+          exclusions: routineExclusionList,
+        );
+      }).toList();
+      return eventDataList;
+    } else {
+      throw mapServerResponseToError(response.statusCode, response.data);
+    }
+  }
+
   addEvent(String token, AddEventParams params) async {
     Options options = Options(
       method: ServerRoutes.addEvent.method,
@@ -130,4 +175,6 @@ class ScheduleServerSource {
       throw mapServerResponseToError(response.statusCode, response.data);
     }
   }
+
+  switchComplete(String token, int idAssignment, bool isCompleted) async {}
 }

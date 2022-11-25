@@ -36,6 +36,7 @@ class EventFieldsVariables {
   final bool undefinedEnd;
   final EndMode endMode;
   final String? frequency;
+  final String? weekDays;
   final bool isTask;
   final bool isCollective;
   final List<Employee> employeeList;
@@ -49,6 +50,7 @@ class EventFieldsVariables {
     required this.undefinedEnd,
     required this.endMode,
     required this.frequency,
+    required this.weekDays,
     required this.isTask,
     required this.isCollective,
     required this.employeeList,
@@ -64,6 +66,7 @@ class EventFieldsSetters {
   final setUndefinedEnd;
   final setEndMode;
   final setFrequency;
+  final setWeekDays;
   final setIsTask;
   final setIsCollective;
   final setAssignedEmployees;
@@ -76,6 +79,7 @@ class EventFieldsSetters {
     required this.setUndefinedEnd,
     required this.setEndMode,
     required this.setFrequency,
+    required this.setWeekDays,
     required this.setIsTask,
     required this.setIsCollective,
     required this.setAssignedEmployees,
@@ -87,6 +91,7 @@ class EventForm extends StatefulWidget {
   final EventFieldsControllers controllers;
   final EventFieldsVariables variables;
   final EventFieldsSetters setters;
+  final bool showTaskSection;
 
   const EventForm({
     Key? key,
@@ -94,6 +99,7 @@ class EventForm extends StatefulWidget {
     required this.controllers,
     required this.variables,
     required this.setters,
+    required this.showTaskSection,
   }) : super(key: key);
 
   @override
@@ -137,6 +143,7 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
           isRoutineIsEnabled: variables.isRoutineIsEnabled,
           isRoutine: variables.isRoutine,
           frequency: variables.frequency,
+          weekDays: variables.weekDays,
           undefinedEnd: variables.undefinedEnd,
           endMode: variables.endMode,
         ),
@@ -146,26 +153,33 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
           setIsRoutineIsEnabled: setters.setIsRoutineIsEnabled,
           setIsRoutine: setters.setIsRoutine,
           setFrequency: setters.setFrequency,
+          setWeekDays: setters.setWeekDays,
           setUndefinedEnd: setters.setUndefinedEnd,
           setEndMode: setters.setEndMode,
         ),
       ),
-      const SizedBox(
-        height: 30,
-      ),
-      TaskFields(
-        variables: TaskFieldsVariables(
-          isTask: variables.isTask,
-          isCollective: variables.isCollective,
-          employeeList: variables.employeeList,
-          assignedEmployees: variables.assignedEmployees,
+    ];
+    if (widget.showTaskSection) {
+      formFields.addAll([
+        const SizedBox(
+          height: 30,
         ),
-        setters: TaskFieldsSetters(
-          setIsTask: setters.setIsTask,
-          setIsCollective: setters.setIsCollective,
-          setAssignedEmployees: setters.setAssignedEmployees,
+        TaskFields(
+          variables: TaskFieldsVariables(
+            isTask: variables.isTask,
+            isCollective: variables.isCollective,
+            employeeList: variables.employeeList,
+            assignedEmployees: variables.assignedEmployees,
+          ),
+          setters: TaskFieldsSetters(
+            setIsTask: setters.setIsTask,
+            setIsCollective: setters.setIsCollective,
+            setAssignedEmployees: setters.setAssignedEmployees,
+          ),
         ),
-      ),
+      ]);
+    }
+    formFields.addAll([
       const SizedBox(
         height: 30,
       ),
@@ -204,7 +218,7 @@ class _EventFormState extends State<EventForm> with InputValidationMixin {
         validator: (description) =>
             validateString(description, 0, 500, required: false),
       ),
-    ];
+    ]);
 
     return FormBuilder(
       key: widget.formKey,

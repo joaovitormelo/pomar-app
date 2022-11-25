@@ -5,22 +5,41 @@ import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class EventDisplay extends StatelessWidget {
+class EventDisplay extends StatefulWidget {
   final EventData eventD;
   final DateTime day;
   final onEventPressed;
-  const EventDisplay(
-      {Key? key,
-      required this.eventD,
-      required this.day,
-      required this.onEventPressed})
-      : super(key: key);
+  final bool userIsEmployee;
+  final bool isRisked;
+  final onRiskTask;
+
+  EventDisplay({
+    Key? key,
+    required this.eventD,
+    required this.day,
+    required this.onEventPressed,
+    required this.userIsEmployee,
+    required this.isRisked,
+    required this.onRiskTask,
+  }) : super(key: key);
+
+  @override
+  State<EventDisplay> createState() => _EventDisplayState();
+}
+
+class _EventDisplayState extends State<EventDisplay> {
+  void _onRiskTask(bool? value) {
+    widget.onRiskTask(
+      value as bool,
+      widget.eventD.event.idEvent,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     String textTime = '';
-    EventModel event = eventD.event;
-    List<AssignmentModel> assignmentList = eventD.assignments;
+    EventModel event = widget.eventD.event;
+    List<AssignmentModel> assignmentList = widget.eventD.assignments;
     if (event.initTime != null && event.endTime != null) {
       String endTime = event.endTime as String;
       textTime =
@@ -37,7 +56,7 @@ class EventDisplay extends StatelessWidget {
           completedCount += 1;
         }
       }).toList();
-      if (isSameDay(day, DateTime.now())) {
+      if (isSameDay(widget.day, DateTime.now())) {
         if (event.isCollective as bool) {
           if (completedCount > 0) {
             taskIsCompleted = true;
@@ -96,6 +115,14 @@ class EventDisplay extends StatelessWidget {
           ),
         ),
       );
+      if (isSameDay(widget.day, DateTime.now()) && widget.userIsEmployee) {
+        row2Children.add(
+          Checkbox(
+            value: widget.isRisked,
+            onChanged: _onRiskTask,
+          ),
+        );
+      }
     }
     row2Children.add(Expanded(
       child: Padding(
@@ -108,7 +135,7 @@ class EventDisplay extends StatelessWidget {
       ),
     ));
     return GestureDetector(
-      onTap: onEventPressed,
+      onTap: widget.onEventPressed,
       child: Container(
         decoration: BoxDecoration(
           color: color,

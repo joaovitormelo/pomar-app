@@ -4,6 +4,8 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/helpers/input_validation_mixin.dart';
 import 'package:pomar_app/core/utils/utils.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
@@ -28,8 +30,15 @@ class AddEventPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AddEventBloc>(
-      create: (context) => Globals.sl<AddEventBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (context) => Globals.sl<AuthBloc>(),
+        ),
+        BlocProvider<AddEventBloc>(
+          create: (context) => Globals.sl<AddEventBloc>(),
+        )
+      ],
       child: AddEventBody(
         employeeList: employeeList,
       ),
@@ -62,6 +71,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
   bool isRoutineIsEnabled = false;
   bool isRoutine = false;
   String? frequency;
+  String? weekDays;
   bool undefinedEnd = true;
   EndMode endMode = EndMode.endDate;
   bool isTask = false;
@@ -117,6 +127,12 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
     });
   }
 
+  setWeekDays(value) {
+    setState(() {
+      weekDays = value;
+    });
+  }
+
   setIsTask(value) {
     setState(() {
       isTask = value;
@@ -133,6 +149,10 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
     setState(() {
       assignedEmployees = value;
     });
+  }
+
+  _isUserAdmin() {
+    return BlocProvider.of<AuthBloc>(context).state is AuthorizedAdmin;
   }
 
   onSubmit() {
@@ -194,7 +214,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
         initDate: date,
         frequency: frequency,
         interval: interval,
-        weekDays: "",
+        weekDays: weekDays,
         undefinedEnd: undefinedEnd,
         endDate: endDate,
         times: times,
@@ -269,6 +289,7 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
                     undefinedEnd: undefinedEnd,
                     endMode: endMode,
                     frequency: frequency,
+                    weekDays: weekDays,
                     isTask: isTask,
                     isCollective: isCollective,
                     employeeList: employeeList,
@@ -282,10 +303,12 @@ class _AddEventBodyState extends State<AddEventBody> with InputValidationMixin {
                     setUndefinedEnd: setUndefinedEnd,
                     setEndMode: setEndMode,
                     setFrequency: setFrequency,
+                    setWeekDays: setWeekDays,
                     setIsTask: setIsTask,
                     setIsCollective: setIsCollective,
                     setAssignedEmployees: setAssignedEmployees,
                   ),
+                  showTaskSection: _isUserAdmin(),
                 ),
               ],
             ),

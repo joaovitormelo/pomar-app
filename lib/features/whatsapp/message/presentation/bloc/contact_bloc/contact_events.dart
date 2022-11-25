@@ -19,3 +19,9 @@ class UpdateContactsAfterSent extends ContactEvent {
 
   UpdateContactsAfterSent({required this.contactList});
 }
+
+class RemoveContact extends ContactEvent {
+  final int idContact;
+
+  RemoveContact({required this.idContact});
+}

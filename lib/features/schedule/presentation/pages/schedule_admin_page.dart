@@ -1,15 +1,16 @@
-import 'dart:collection';
-import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pomar_app/core/config/globals.dart';
 import 'package:pomar_app/core/presentation/routes/fluro_routes.dart';
 import 'package:pomar_app/core/presentation/widgets/error_display.dart';
 import 'package:pomar_app/core/utils/utils.dart';
+import 'package:pomar_app/features/auth/domain/entities/person.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:pomar_app/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:pomar_app/features/employee/domain/entities/employee.dart';
 import 'package:pomar_app/features/employee/presentation/bloc/employee_bloc.dart';
+import 'package:pomar_app/features/schedule/data/models/assignment_model.dart';
 import 'package:pomar_app/features/schedule/data/models/event_model.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_delete_event.dart';
 import 'package:pomar_app/features/schedule/domain/usecases/do_read_events.dart';
@@ -17,9 +18,11 @@ import 'package:pomar_app/features/schedule/presentation/bloc/bloc.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/delete_event/delete_event_bloc.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/delete_event/delete_event_events.dart';
 import 'package:pomar_app/features/schedule/presentation/bloc/delete_event/delete_event_states.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/switch_complete_bloc/switch_complete_bloc.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/switch_complete_bloc/switch_complete_events.dart';
+import 'package:pomar_app/features/schedule/presentation/bloc/switch_complete_bloc/switch_complete_states.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/custom_calendar.dart';
 import 'package:pomar_app/features/schedule/presentation/widgets/event_detail_modal.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 const textScheduleLoadError = "Erro";
 const textScheduleAdminTitle = "Agenda";
@@ -31,14 +34,20 @@ class ScheduleAdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<AuthBloc>(
+          create: (context) => Globals.sl<AuthBloc>(),
+        ),
         BlocProvider<ReadEventsBloc>(
           create: (context) => Globals.sl<ReadEventsBloc>(),
         ),
         BlocProvider<EmployeesBloc>(
           create: (context) => Globals.sl<EmployeesBloc>(),
         ),
-        BlocProvider(
+        BlocProvider<DeleteEventBloc>(
           create: (context) => Globals.sl<DeleteEventBloc>(),
+        ),
+        BlocProvider<SwitchCompleteBloc>(
+          create: (context) => Globals.sl<SwitchCompleteBloc>(),
         ),
       ],
       child: const ScheduleAdminBody(),
@@ -54,15 +63,33 @@ class ScheduleAdminBody extends StatefulWidget {
 }
 
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
-  var _calendarView = CalendarView.month;
-  final _calendarController = CalendarController();
   List<Employee> employeeList = [];
+  List<EventData> eventDList = [];
 
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
+    _loadEvents();
     BlocProvider.of<EmployeesBloc>(context).add(LoadEmployees());
+  }
+
+  _loadEvents() {
+    if (BlocProvider.of<AuthBloc>(context).state is AuthorizedAdmin) {
+      BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
+    } else {
+      AuthorizedEmployee state =
+          BlocProvider.of<AuthBloc>(context).state as AuthorizedEmployee;
+      BlocProvider.of<ReadEventsBloc>(context).add(
+          LoadEventsByEmployee(idPerson: state.session.user.person.idPerson));
+    }
+  }
+
+  _shouldShowOptions(bool isTask) {
+    if (BlocProvider.of<AuthBloc>(context).state is AuthorizedAdmin) {
+      return true;
+    } else {
+      return !isTask;
+    }
   }
 
   _onEventPressed(DateTime day, EventData eventD, List<Employee> employeeList) {
@@ -76,6 +103,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
         onEditButtonPressed: _onEditButtonPressed,
         onDelete: _onDelete,
         day: day,
+        showOptions: _shouldShowOptions(eventD.event.isTask),
       ),
     );
   }
@@ -111,10 +139,43 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     ).then(
       (wasEdited) {
         if (wasEdited != null) {
-          BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
+          _loadEvents();
           Navigator.pop(context);
         }
       },
+    );
+  }
+
+  _onRiskTask(bool isCompleted, int idEvent) {
+    int eventIndex =
+        eventDList.indexWhere((eventD) => eventD.event.idEvent == idEvent);
+    EventData eventData = eventDList[eventIndex];
+    int idPersonEmployee =
+        (BlocProvider.of<AuthBloc>(context).state as AuthorizedEmployee)
+            .session
+            .user
+            .person
+            .idPerson;
+    int idEmployee = employeeList
+        .firstWhere((e) => e.person.idPerson == idPersonEmployee)
+        .idEmployee;
+    int index = eventData.assignments
+        .indexWhere((assignment) => assignment.idEmployee == idEmployee);
+    AssignmentModel assignment = eventData.assignments[index];
+    eventData.assignments[index] = AssignmentModel(
+        idAssignment: assignment.idAssignment,
+        idEvent: idEvent,
+        idEmployee: assignment.idEmployee,
+        isCompleted: isCompleted);
+    setState(() {
+      eventDList[eventIndex] = eventData;
+      eventDList = eventDList;
+    });
+    BlocProvider.of<SwitchCompleteBloc>(context).add(
+      SwitchComplete(
+        idAssignment: assignment.idAssignment,
+        isCompleted: isCompleted,
+      ),
     );
   }
 
@@ -128,7 +189,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
           } else if (state is DeleteEventSuccess) {
             Navigator.pop(context);
             Navigator.pop(context);
-            BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents());
+            _loadEvents();
           } else if (state is DeleteEventError) {
             Navigator.pop(context);
             Navigator.pop(context);
@@ -136,15 +197,31 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
           }
         }),
         BlocListener<ReadEventsBloc, ReadEventsState>(
-          listenWhen: (_, state) => state is ReadEventsError,
           listener: (context, state) {
-            Utils.showSnackBar(context, (state as ReadEventsError).msg);
+            if (state is ReadEventsError) {
+              Utils.showSnackBar(context, (state as ReadEventsError).msg);
+            } else if (state is ReadEventsHasData) {
+              setState(() {
+                eventDList = state.eventList;
+              });
+            }
           },
         ),
         BlocListener<EmployeesBloc, EmployeesState>(
           listenWhen: (_, state) => state is EmployeesError,
           listener: (context, state) {
             Utils.showSnackBar(context, (state as EmployeesError).msg);
+          },
+        ),
+        BlocListener<SwitchCompleteBloc, SwitchCompleteState>(
+          listener: (context, state) {
+            if (state is SwitchCompleteFinished) {
+              BlocProvider.of<ReadEventsBloc>(context).add(
+                UpdateEventList(eventDList: eventDList),
+              );
+            } else if (state is SwitchCompleteError) {
+              Utils.showSnackBar(context, state.msg);
+            }
           },
         ),
       ],
@@ -170,12 +247,22 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
             if (employeesState is EmployeesHasData) {
               employeeList = employeesState.employees;
             }
+            AuthState authState = BlocProvider.of<AuthBloc>(context).state;
+            Person person;
+            if (authState is AuthorizedEmployee) {
+              person = authState.session.user.person;
+            } else {
+              person = (authState as AuthorizedAdmin).session.user.person;
+            }
             return Column(
               children: [
                 CustomCalendarPage(
                   eventDataList: eventDataList,
                   employeeList: employeeList,
+                  userPerson: person,
+                  userIsEmployee: authState is AuthorizedEmployee,
                   onEventPressed: _onEventPressed,
+                  onRiskTask: _onRiskTask,
                 ),
               ],
             );
@@ -204,8 +291,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
                 FluroRoutes.addEventRoute,
                 arguments: employeesState.employees,
               ).then(
-                (value) =>
-                    BlocProvider.of<ReadEventsBloc>(context).add(LoadEvents()),
+                (value) => _loadEvents(),
               );
             },
             child: const Icon(Icons.add),

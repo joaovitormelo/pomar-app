@@ -5,7 +5,7 @@ import 'package:pomar_app/features/whatsapp/connection/usecases/do_check_connect
 import 'package:pomar_app/features/whatsapp/connection/usecases/do_disconnect.dart';
 import 'package:pomar_app/features/whatsapp/connection/websockets/web_socket_client.dart';
 import 'package:pomar_app/features/whatsapp/data/whatsapp_source.dart';
-import 'package:pomar_app/features/whatsapp/message/data/readers/excel_reader.dart';
+import 'package:pomar_app/features/whatsapp/message/data/readers/excel_manager.dart';
 import 'package:pomar_app/features/whatsapp/message/presentation/bloc/contact_bloc/contact_bloc.dart';
 import 'package:pomar_app/features/whatsapp/message/presentation/bloc/send_messages_bloc/send_messages_bloc.dart';
 import 'package:pomar_app/features/whatsapp/message/usecases/do_read_contact_list.dart';
@@ -41,12 +41,12 @@ class WhatsAppInitializer {
 
     sl.registerFactory(() => DoCheckConnection(serverSource: sl()));
     sl.registerFactory(() => DoDisconnect(serverSource: sl()));
-    sl.registerFactory(() => DoReadContactList(excelReader: sl()));
+    sl.registerFactory(() => DoReadContactList(ExcelManager: sl()));
     sl.registerFactory(() => DoSendMessages(serverSource: sl()));
 
     sl.registerFactory<WhatsAppServerSource>(
       () => WhatsAppServerSource(dio: sl()),
     );
-    sl.registerFactory<ExcelReaderContract>(() => ExcelReader());
+    sl.registerFactory<ExcelManagerContract>(() => ExcelManager());
   }
 }

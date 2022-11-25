@@ -101,6 +101,44 @@ class _WhatsAppMessageBodyState extends State<WhatsAppMessageBody>
     }
   }
 
+  _getContactTile(int index, ContactModel contact) {
+    Color badgeColor;
+    if (contact.status == SentStatus.unsent) {
+      badgeColor = Colors.grey;
+    } else if (contact.status == SentStatus.success) {
+      badgeColor = Colors.green;
+    } else {
+      badgeColor = Colors.red;
+    }
+    return ListTile(
+      leading: Column(
+        children: [
+          Expanded(
+            child: Badge(
+              alignment: Alignment.center,
+              badgeColor: badgeColor,
+            ),
+          ),
+        ],
+      ),
+      title: Wrap(
+        spacing: 5,
+        children: [
+          Text(contact.name),
+          Text(contact.phone),
+        ],
+      ),
+      trailing: IconButton(
+        icon: Icon(Icons.close),
+        onPressed: () => _removeContact(index),
+      ),
+    );
+  }
+
+  _removeContact(int index) {
+    BlocProvider.of<ContactBloc>(context).add(RemoveContact(idContact: index));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,10 +194,21 @@ class _WhatsAppMessageBodyState extends State<WhatsAppMessageBody>
                     const SizedBox(
                       width: 5,
                     ),
-                    const Expanded(
-                      child: Text(
-                        "Lista de contatos",
-                        style: TextStyle(fontSize: 18),
+                    Expanded(
+                      child: BlocBuilder<ContactBloc, ContactState>(
+                        builder: (context, state) {
+                          if (state is ContactHasData) {
+                            return Text(
+                              "Lista de contatos (${state.contactList.length})",
+                              style: TextStyle(fontSize: 18),
+                            );
+                          } else {
+                            return const Text(
+                              "Lista de contatos (0)",
+                              style: TextStyle(fontSize: 18),
+                            );
+                          }
+                        },
                       ),
                     ),
                     TextButton(
@@ -182,44 +231,29 @@ class _WhatsAppMessageBodyState extends State<WhatsAppMessageBody>
                   child: Center(
                     child: BlocConsumer<ContactBloc, ContactState>(
                       listener: (context, state) {
-                        if (state is ContactError) {
-                          Utils.showSnackBar(
-                            context,
-                            "Erro ao importar contatos",
-                          );
+                        print(state);
+                        if (state is ContactLoading) {
+                          Utils.showLoadingEntirePage(context);
+                        } else {
+                          Navigator.of(context).pop();
+                          if (state is ContactError) {
+                            Utils.showSnackBar(
+                              context,
+                              "Erro ao importar contatos",
+                            );
+                          }
                         }
                       },
                       builder: (context, state) {
-                        print(state);
                         if (state is ContactHasData) {
                           return ListView.builder(
                               itemCount: state.contactList.length,
                               itemBuilder: (context, i) {
-                                ContactModel contact = state.contactList[i];
-                                Color badgeColor;
-                                if (contact.status == SentStatus.unsent) {
-                                  badgeColor = Colors.grey;
-                                } else if (contact.status ==
-                                    SentStatus.success) {
-                                  badgeColor = Colors.green;
-                                } else {
-                                  badgeColor = Colors.red;
-                                }
-                                return ListTile(
-                                  leading: Column(
-                                    children: [
-                                      Expanded(
-                                        child: Badge(
-                                          alignment: Alignment.center,
-                                          badgeColor: badgeColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  title: Text(contact.name),
-                                  trailing: Text(contact.phone),
-                                );
+                                return _getContactTile(i, state.contactList[i]);
                               });
+                        } else if (state is ContactLoading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else {
                           return const Center(
                               child: Text("Sem contatos importados"));
@@ -250,8 +284,9 @@ class _WhatsAppMessageBodyState extends State<WhatsAppMessageBody>
                               ),
                               maxLines: 10,
                               autovalidateMode: AutovalidateMode.always,
-                              validator: (description) =>
-                                  validateString(description, 0, 3000),
+                              validator: (description) => validateString(
+                                  description, 0, 3000,
+                                  emptyText: "Informe uma mensagem"),
                             ),
                           ],
                         ),
