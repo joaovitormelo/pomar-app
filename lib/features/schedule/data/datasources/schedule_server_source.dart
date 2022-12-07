@@ -40,7 +40,6 @@ class ScheduleServerSource {
             .map<AssignmentModel>(
                 (assignment) => AssignmentModel.fromJSON(assignment))
             .toList();
-        inspect(eventData);
         List<RoutineExclusionModel> routineExclusionList =
             eventData["routine_exclusion_list"]
                 .map<RoutineExclusionModel>((routineExclusion) =>
@@ -85,7 +84,6 @@ class ScheduleServerSource {
             .map<AssignmentModel>(
                 (assignment) => AssignmentModel.fromJSON(assignment))
             .toList();
-        inspect(eventData);
         List<RoutineExclusionModel> routineExclusionList =
             eventData["routine_exclusion_list"]
                 .map<RoutineExclusionModel>((routineExclusion) =>
@@ -176,5 +174,72 @@ class ScheduleServerSource {
     }
   }
 
-  switchComplete(String token, int idAssignment, bool isCompleted) async {}
+  switchComplete(String token, int idAssignment, bool isCompleted) async {
+    //throw ConnectionError();
+    Options options = Options(
+      method: ServerRoutes.switchCompleteEvent.method,
+      headers: {
+        "Authorization": token,
+      },
+    );
+    Response response;
+    try {
+      response = await dio.request(ServerRoutes.switchCompleteEvent.path,
+          options: options,
+          data: {
+            "id_assignment": idAssignment,
+            "is_completed": isCompleted,
+          });
+    } catch (e) {
+      print(e);
+      throw ConnectionError();
+    }
+    if (response.statusCode != 200) {
+      throw mapServerResponseToError(response.statusCode, response.data);
+    }
+  }
+
+  readTasksByEmployee(String token, int idPerson) async {
+    Options options = Options(
+      method: ServerRoutes.readTasksByEmployee.method,
+      headers: {
+        "Authorization": token,
+      },
+    );
+    Response response;
+    try {
+      response = await dio.request(
+        ServerRoutes.readTasksByEmployee.path,
+        options: options,
+        data: {
+          "id_person": idPerson,
+        },
+      );
+    } catch (e) {
+      print(e);
+      throw ConnectionError();
+    }
+    if (response.statusCode == 200) {
+      List<EventData> eventDataList =
+          (response.data as List).map<EventData>((eventData) {
+        List<AssignmentModel> assignments = eventData['assignments']
+            .map<AssignmentModel>(
+                (assignment) => AssignmentModel.fromJSON(assignment))
+            .toList();
+        List<RoutineExclusionModel> routineExclusionList =
+            eventData["routine_exclusion_list"]
+                .map<RoutineExclusionModel>((routineExclusion) =>
+                    RoutineExclusionModel.fromJSON(routineExclusion))
+                .toList();
+        return EventData(
+          event: EventModel.fromJSON(eventData['event']),
+          assignments: assignments,
+          exclusions: routineExclusionList,
+        );
+      }).toList();
+      return eventDataList;
+    } else {
+      throw mapServerResponseToError(response.statusCode, response.data);
+    }
+  }
 }

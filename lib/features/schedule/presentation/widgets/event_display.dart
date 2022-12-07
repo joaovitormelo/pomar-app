@@ -50,7 +50,11 @@ class _EventDisplayState extends State<EventDisplay> {
     var completedCount = 0;
     var assignmentsCount = assignmentList.length;
     if (event.isTask) {
-      color = Colors.green;
+      if (widget.isRisked) {
+        color = Colors.grey;
+      } else {
+        color = Colors.green;
+      }
       assignmentList.map((assignment) {
         if (assignment.isCompleted == true) {
           completedCount += 1;
@@ -77,7 +81,7 @@ class _EventDisplayState extends State<EventDisplay> {
       style: TextStyle(
         color: Colors.white,
         fontSize: 13,
-        decoration: taskIsCompleted ? TextDecoration.lineThrough : null,
+        decoration: widget.isRisked ? TextDecoration.lineThrough : null,
         decorationThickness: 2,
       ),
     ));

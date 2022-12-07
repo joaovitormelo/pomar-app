@@ -32,6 +32,10 @@ class ServerRoutes {
       ServerRouteInfo(path: "event", method: "put");
   static ServerRouteInfo deleteEvent =
       ServerRouteInfo(path: "event", method: "delete");
+  static ServerRouteInfo switchCompleteEvent =
+      ServerRouteInfo(path: "event/complete", method: "post");
+  static ServerRouteInfo readTasksByEmployee =
+      ServerRouteInfo(path: "tasks/employee", method: "post");
 
   //WHATSAPP
   static ServerRouteInfo checkConnectionWhats =

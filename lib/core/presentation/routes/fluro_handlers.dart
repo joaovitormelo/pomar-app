@@ -25,7 +25,7 @@ class FluroHandlers {
   static Handler homeAdminHandler =
       Handler(handlerFunc: (context, params) => const HomeAdmin());
   static Handler homeEmployeeHandler =
-      Handler(handlerFunc: (context, params) => const HomeEmployee());
+      Handler(handlerFunc: (context, params) => const HomeEmployeePage());
   //EMPLOYEE
   static Handler employeesHandler =
       Handler(handlerFunc: (context, params) => const EmployeesPage());

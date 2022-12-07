@@ -27,6 +27,13 @@ import 'package:pomar_app/features/schedule/presentation/widgets/event_detail_mo
 const textScheduleLoadError = "Erro";
 const textScheduleAdminTitle = "Agenda";
 
+class SwitchCompleteData {
+  final int idEvent;
+  final bool isCompleted;
+
+  SwitchCompleteData({required this.idEvent, required this.isCompleted});
+}
+
 class ScheduleAdminPage extends StatelessWidget {
   const ScheduleAdminPage({Key? key}) : super(key: key);
 
@@ -65,6 +72,7 @@ class ScheduleAdminBody extends StatefulWidget {
 class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
   List<Employee> employeeList = [];
   List<EventData> eventDList = [];
+  late SwitchCompleteData switchCompleteData;
 
   @override
   void initState() {
@@ -146,10 +154,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     );
   }
 
-  _onRiskTask(bool isCompleted, int idEvent) {
-    int eventIndex =
-        eventDList.indexWhere((eventD) => eventD.event.idEvent == idEvent);
-    EventData eventData = eventDList[eventIndex];
+  _getUserAssignmentIndex(EventData eventData) {
     int idPersonEmployee =
         (BlocProvider.of<AuthBloc>(context).state as AuthorizedEmployee)
             .session
@@ -159,23 +164,42 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
     int idEmployee = employeeList
         .firstWhere((e) => e.person.idPerson == idPersonEmployee)
         .idEmployee;
-    int index = eventData.assignments
+    return eventData.assignments
         .indexWhere((assignment) => assignment.idEmployee == idEmployee);
-    AssignmentModel assignment = eventData.assignments[index];
-    eventData.assignments[index] = AssignmentModel(
-        idAssignment: assignment.idAssignment,
-        idEvent: idEvent,
-        idEmployee: assignment.idEmployee,
-        isCompleted: isCompleted);
+  }
+
+  _onRiskTask(bool isCompleted, int idEvent) {
     setState(() {
-      eventDList[eventIndex] = eventData;
-      eventDList = eventDList;
+      switchCompleteData =
+          SwitchCompleteData(idEvent: idEvent, isCompleted: isCompleted);
     });
+    int eventIndex =
+        eventDList.indexWhere((eventD) => eventD.event.idEvent == idEvent);
+    EventData eventData = eventDList[eventIndex];
+    int index = _getUserAssignmentIndex(eventData);
+    AssignmentModel assignment = eventData.assignments[index];
     BlocProvider.of<SwitchCompleteBloc>(context).add(
       SwitchComplete(
         idAssignment: assignment.idAssignment,
         isCompleted: isCompleted,
       ),
+    );
+  }
+
+  _updateEventList() {
+    int eventIndex = eventDList.indexWhere(
+        (eventD) => eventD.event.idEvent == switchCompleteData.idEvent);
+    EventData eventData = eventDList[eventIndex];
+    int index = _getUserAssignmentIndex(eventData);
+    AssignmentModel assignment = eventData.assignments[index];
+    eventData.assignments[index] = AssignmentModel(
+      idAssignment: assignment.idAssignment,
+      idEvent: switchCompleteData.idEvent,
+      idEmployee: assignment.idEmployee,
+      isCompleted: switchCompleteData.isCompleted,
+    );
+    BlocProvider.of<ReadEventsBloc>(context).add(
+      UpdateEventList(eventDList: eventDList),
     );
   }
 
@@ -199,7 +223,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
         BlocListener<ReadEventsBloc, ReadEventsState>(
           listener: (context, state) {
             if (state is ReadEventsError) {
-              Utils.showSnackBar(context, (state as ReadEventsError).msg);
+              Utils.showSnackBar(context, state.msg);
             } else if (state is ReadEventsHasData) {
               setState(() {
                 eventDList = state.eventList;
@@ -216,9 +240,7 @@ class _ScheduleAdminBodyState extends State<ScheduleAdminBody> {
         BlocListener<SwitchCompleteBloc, SwitchCompleteState>(
           listener: (context, state) {
             if (state is SwitchCompleteFinished) {
-              BlocProvider.of<ReadEventsBloc>(context).add(
-                UpdateEventList(eventDList: eventDList),
-              );
+              _updateEventList();
             } else if (state is SwitchCompleteError) {
               Utils.showSnackBar(context, state.msg);
             }
